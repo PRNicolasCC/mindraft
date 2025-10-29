@@ -81,19 +81,10 @@ class App{
             }
         }
 
-        // 3. Validar tamaño del payload
-        /* $maxSize = $this->obtenerMaxPostSize();
-        $contentLength = $_SERVER['CONTENT_LENGTH'] ?? 0;
-        
-        if($contentLength > $maxSize){
-            $maxMB = round($maxSize / (1024 * 1024), 2);
-            $this->mostrarError("Los datos enviados exceden el límite permitido de {$maxMB}MB.");
-        } */
-
-        // 4. Sanitizar datos POST
+        //3. Sanitizar datos POST
         $this->sanitizarDatosPOST();
 
-        // 5. Validar que la petición viene del mismo sitio
+        // 4. Validar que la petición viene del mismo sitio
         if(!$this->validarReferer()){
             $this->mostrarError('La solicitud no proviene de una fuente válida.');
         }
@@ -173,34 +164,6 @@ class App{
         // Validar que el referer inicie con la URL base del sitio
         return strpos($referer, $urlBase) === 0;
     }
-
-    /**
-     * Obtiene el tamaño máximo permitido para POST desde php.ini
-     */
-    /* private function obtenerMaxPostSize(): int {
-        $postMaxSize = ini_get('post_max_size');
-        return $this->convertirABytes($postMaxSize);
-    } */
-
-    /**
-     * Convierte notación de PHP (como '8M', '2G') a bytes
-     */
-    /* private function convertirABytes(string $valor): int {
-        $valor = trim($valor);
-        $ultimo = strtolower($valor[strlen($valor)-1]);
-        $numero = (int)$valor;
-
-        switch($ultimo){
-            case 'g':
-                $numero *= 1024;
-            case 'm':
-                $numero *= 1024;
-            case 'k':
-                $numero *= 1024;
-        }
-
-        return $numero;
-    } */
 
     /**
      * Muestra un error de validación y detiene la ejecución
