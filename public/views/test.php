@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title></title>
+                <style>
+                    /* Reset básico para compatibilidad con clientes de correo */
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background: linear-gradient(135deg, #FADF7D 0%, #FAB669 100%);
+                        padding: 20px;
+                        line-height: 1.6;
+                    }
+
+                    .email-container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background: white;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .header {
+                        background: linear-gradient(135deg, #FBB11E 0%, #FAEE7D 100%);
+                        color: white;
+                        padding: 30px;
+                        text-align: center;
+                    }
+
+                    .header h1 {
+                        font-size: 32px;
+                        margin-bottom: 8px;
+                        font-weight: 600;
+                    }
+
+                    .header p {
+                        font-size: 16px;
+                        opacity: 0.95;
+                    }
+
+                    .content {
+                        padding: 40px 30px;
+                        color: #0f172a;
+                    }
+
+                    .welcome-message {
+                        text-align: center;
+                        margin-bottom: 25px;
+                    }
+
+                    .welcome-message h2 {
+                        color: #FBB11E;
+                        font-size: 26px;
+                        font-weight: 600;
+                        margin-bottom: 15px;
+                    }
+
+                    .message-text {
+                        color: #555;
+                        font-size: 16px;
+                        margin-bottom: 25px;
+                        text-align: left;
+                    }
+
+                    .message-text p {
+                        margin-bottom: 15px;
+                    }
+
+                    .warning-box {
+                        background: #fff3cd;
+                        border-left: 4px solid #ffc107;
+                        padding: 20px;
+                        margin: 25px 0;
+                        border-radius: 6px;
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 12px;
+                    }
+
+                    .warning-icon {
+                        font-size: 24px;
+                        flex-shrink: 0;
+                    }
+
+                    .warning-box p {
+                        margin: 0;
+                        color: #856404;
+                        font-size: 14px;
+                        font-weight: 500;
+                    }
+
+                    .info-box {
+                        background: #d1ecf1;
+                        border-left: 4px solid #17a2b8;
+                        padding: 20px;
+                        margin: 25px 0;
+                        border-radius: 6px;
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 12px;
+                    }
+
+                    .info-icon {
+                        font-size: 24px;
+                        flex-shrink: 0;
+                    }
+
+                    .info-box p {
+                        margin: 0;
+                        color: #0c5460;
+                        font-size: 14px;
+                    }
+
+                    .activation-section,
+                    .reset-section {
+                        background: #f8f9fa;
+                        text-align: center;
+                        margin-top: 40px;
+                        padding: 30px;
+                        border-top: 2px solid #f0f0f0;
+                        border-radius: 8px;
+                    }
+
+                    .activation-text,
+                    .reset-text {
+                        margin-bottom: 25px;
+                        font-size: 16px;
+                        color: #555;
+                    }
+
+                    .activation-button,
+                    .reset-button {
+                        display: inline-block;
+                        background: linear-gradient(135deg, #FBB11E 0%, #FAEE7D 100%);
+                        color: white !important;
+                        padding: 16px 40px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        text-decoration: none;
+                        border-radius: 50px;
+                        border: none;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(251, 177, 30, 0.4);
+                        transition: all 0.3s ease;
+                    }
+
+                    .activation-button:hover,
+                    .reset-button:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(251, 177, 30, 0.6);
+                    }
+
+                    .security-tips {
+                        background: #e7f3ff;
+                        border-radius: 8px;
+                        padding: 20px;
+                        margin: 25px 0;
+                    }
+
+                    .security-tips h3 {
+                        color: #0066cc;
+                        font-size: 18px;
+                        margin-bottom: 12px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+
+                    .security-tips ul {
+                        margin: 10px 0;
+                        padding-left: 20px;
+                        color: #555;
+                        font-size: 14px;
+                    }
+
+                    .security-tips li {
+                        margin: 8px 0;
+                    }
+
+                    .footer {
+                        background: #f8f9fa;
+                        padding: 25px 30px;
+                        text-align: center;
+                        color: #666;
+                        font-size: 14px;
+                        border-top: 1px solid #e9ecef;
+                    }
+
+                    .footer p {
+                        margin: 8px 0;
+                    }
+
+                    .footer a {
+                        color: #FBB11E;
+                        text-decoration: none;
+                        font-weight: 600;
+                    }
+
+                    .footer a:hover {
+                        text-decoration: underline;
+                    }
+
+                    /* Compatibilidad con clientes de correo */
+                    @media screen and (max-width: 600px) {
+                        body {
+                            padding: 10px;
+                        }
+
+                        .email-container {
+                            margin: 0;
+                            border-radius: 0;
+                        }
+
+                        .content {
+                            padding: 25px 20px;
+                        }
+
+                        .header {
+                            padding: 25px 20px;
+                        }
+
+                        .header h1 {
+                            font-size: 26px;
+                        }
+
+                        .activation-button,
+                        .reset-button {
+                            padding: 14px 30px;
+                            font-size: 16px;
+                        }
+
+                        .reset-section {
+                            padding: 20px;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+
+<div class="email-container">
+                    <!-- Header -->
+                    <div class="header">
+                        <h1>📝 MisNotas</h1>
+                        <p>Tu aplicación personal de notas</p>
+                    </div>
+
+                    <!-- Contenido principal -->
+                    <div class="content">
+                        <div class="welcome-message">
+                            <h2>¡Bienvenido a {$_ENV['APP_NAME']}! 🎉</h2>
+                        </div>
+
+                        <div class="message-text">
+                            <p>Hola,</p>
+                            <p>¡Nos complace informarte que tu cuenta ha sido <strong>registrada exitosamente</strong> en nuestra aplicación de notas!</p>
+                            <p>Con MisNotas podrás:</p>
+                            <ul style="margin: 15px 0; padding-left: 20px;">
+                                <li>Crear y organizar todas tus notas</li>
+                                <li>Sincronizar tus datos en todos tus dispositivos</li>
+                                <li>Buscar rápidamente cualquier información</li>
+                                <li>Mantener tus notas seguras y privadas</li>
+                            </ul>
+                        </div>
+
+                        <!-- Advertencia importante -->
+                        <div class="warning-box">
+                            <div class="warning-icon">⚠️</div>
+                            <p><strong>¡Importante!</strong> Tu cuenta aún no está activa. Debes activarla para poder acceder a todas las funcionalidades de la aplicación.</p>
+                        </div>
+
+                        <!-- Sección de activación -->
+                        <div class="activation-section">
+                            <p class="activation-text">
+                                Para completar tu registro y comenzar a usar MisNotas, haz clic en el siguiente botón:
+                            </p>
+
+                            <!-- <a href="'.$_ENV['DOMAIN'].'/index.php?action=active_account" class="activation-button">
+                                ✅ Activar mi cuenta
+                            </a> -->
+
+                            <form action="'.$_ENV['DOMAIN'].'" method="post" style="display: inline;">
+                                <input type="hidden" name="activate_user" value="'.$email.'">
+                                <button type="submit" class="activation-button">
+                                    ✅ Activar mi cuenta
+                                </button>
+                            </form>
+
+                            <p style="margin-top: 20px; font-size: 14px; color: #888;">
+                                Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
+                                <span style="word-break: break-all; color: #FBB11E;">#ACTIVATION_LINK#</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="footer">
+                        <!-- <p>Este enlace de activación expirará en 24 horas por seguridad.</p> -->
+                        <p>Si no solicitaste esta cuenta, puedes ignorar este correo.</p>
+                        <p style="margin-top: 15px;">
+                            ¿Necesitas ayuda? <a href="'.$_ENV['MY_EMAIL'].'">Contáctanos</a>
+                        </p>
+                    </div>
+                </div>
+            
+            </body>
+            </html>`;

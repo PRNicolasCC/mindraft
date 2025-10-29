@@ -1,0 +1,11 @@
+# Línea 2 y 3: Si la URL solicitada no es un archivo (-f) o un directorio (-d) real (como /css/style.css), entonces...
+# Línea 4: ...redirige la solicitud a index.php. La parte (.*)$ captura la URL solicitada y la pasa a index.php para que este pueda procesarla
+# También se agrega '?url=$1' para recibir un $_GET['url'] en cada solicitud
+
+# Activa el motor de reescritura
+RewriteEngine On
+
+# If the requested resource is not a file or directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
