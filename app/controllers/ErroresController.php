@@ -3,9 +3,12 @@ declare(strict_types=1);
 
 class ErroresController extends Controller{
 
-    function __construct(){
+    function __construct(string $error){
         parent::__construct();
-        $this->view->mensaje = "Error 404: La página solicitada no existe.";
+        $this->view->message = [
+            'description' => $error,
+            'type' => 'error'
+        ];
         $this->view->render('errores/index');
     }
 }

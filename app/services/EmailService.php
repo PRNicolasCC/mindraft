@@ -8,155 +8,141 @@ use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 
 class EmailService {
-
     /* MÉTODOS PÚBLICOS */
     public static function sendEmailRecuperacion(string $email): void {
         // Generar token criptográficamente seguro
         $reset_token = bin2hex(random_bytes(32)); // 64 caracteres hexadecimales
 
-        $subject = "Recuperación de Contraseña - Aplicación de Notas";
+        $subject = "Recuperación de Contraseña - ". htmlspecialchars($_ENV['APP_NAME']);
         $message = '
-                <!-- Contenido principal -->
-                <div class="content">
-                    <div class="welcome-message">
-                        <h2>Solicitud de Cambio de Contraseña</h2>
-                    </div>
+    <!-- Contenido principal -->
+    <div class="content">
+    <div class="welcome-message">
+        <h2>Solicitud de Cambio de Contraseña</h2>
+    </div>
 
-                    <div class="message-text">
-                        <p>Hola,</p>
-                        <p>Hemos recibido una solicitud para <strong>restablecer la contraseña</strong> de tu cuenta en '.$_ENV['APP_NAME'].'.</p>
-                        <p>Si fuiste tú quien realizó esta solicitud, puedes cambiar tu contraseña haciendo clic en el botón de abajo.</p>
-                    </div>
+    <div class="message-text">
+        <p>Hola,</p>
+        <p>Hemos recibido una solicitud para <strong>restablecer la contraseña</strong> de tu cuenta en ' . htmlspecialchars($_ENV['APP_NAME']) . '.</p>
+        <p>Si fuiste tú quien realizó esta solicitud, puedes cambiar tu contraseña haciendo clic en el botón de abajo.</p>
+    </div>
 
-                    <!-- Advertencia importante -->
-                    <div class="warning-box">
-                        <div class="warning-icon">⚠️</div>
-                        <p><strong>¡Importante!</strong> Este enlace expirará en 1 hora por seguridad. Si no cambiaste tu contraseña en ese tiempo, deberás solicitar un nuevo enlace.</p>
-                    </div>
+    <div class="warning-box">
+        <div class="warning-icon">⚠️</div>
+        <p><strong>¡Importante!</strong> Este enlace expirará en 1 hora por seguridad. Si no cambiaste tu contraseña en ese tiempo, deberás solicitar un nuevo enlace.</p>
+    </div>
 
-                    <!-- Sección de restablecimiento -->
-                    <div class="reset-section">
-                        <p class="reset-text">
-                            Para crear una nueva contraseña y recuperar el acceso a tu cuenta, haz clic en el siguiente botón:
-                        </p>
+    <div class="reset-section">
+        <p class="reset-text">
+            Para crear una nueva contraseña y recuperar el acceso a tu cuenta, haz clic en el siguiente botón:
+        </p>
 
-                        <form action='. $_ENV['DOMAIN'] .' method="post" style="display: inline;">
-                            <input type="hidden" name="reset_token" value=`. $reset_token . `>
-                            <input type="hidden" name="email" value=`. $email . `>
-                            <button type="submit" class="reset-button">
-                                🔑 Cambiar mi contraseña
-                            </button>
-                        </form>
+        <form action="' . htmlspecialchars($_ENV['DOMAIN']) . '" method="post" style="display: inline;">
+            
+            <input type="hidden" name="reset_token" value="' . htmlspecialchars($reset_token) . '">
+            
+            <input type="hidden" name="email" value="' . htmlspecialchars($email) . '">
+            
+            <button type="submit" class="reset-button">
+                🔑 Cambiar mi contraseña
+            </button>
+        </form>
 
-                        <!-- <p style="margin-top: 20px; font-size: 14px; color: #888;">
-                            Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
-                            <span style="word-break: break-all; color: #667eea;">'. $_ENV['DOMAIN'] . '/reset-password?token=`. $reset_token . `</span>
-                        </p> -->
-                    </div>
+        </div>
 
-                    <!-- Info de seguridad -->
-                    <div class="info-box">
-                        <div class="info-icon">ℹ️</div>
-                        <p><strong>¿No solicitaste este cambio?</strong> Si no reconoces esta solicitud, puedes ignorar este correo. Tu contraseña actual permanecerá segura y no se realizará ningún cambio.</p>
-                    </div>
+    <div class="info-box">
+        <div class="info-icon">ℹ️</div>
+        <p><strong>¿No solicitaste este cambio?</strong> Si no reconoces esta solicitud, puedes ignorar este correo. Tu contraseña actual permanecerá segura y no se realizará ningún cambio.</p>
+    </div>
 
-                    <!-- Consejos de seguridad -->
-                    <div class="security-tips">
-                        <h3>🛡️ Consejos para una contraseña segura:</h3>
-                        <ul>
-                            <li>Usa al menos 8 caracteres</li>
-                            <li>Combina letras mayúsculas y minúsculas</li>
-                            <li>Incluye números y símbolos especiales</li>
-                            <li>Evita usar información personal obvia</li>
-                            <li>No reutilices contraseñas de otras cuentas</li>
-                        </ul>
-                    </div>
-                </div>
+    <div class="security-tips">
+        <h3>🛡️ Consejos para una contraseña segura:</h3>
+        <ul>
+            <li>Usa al menos 8 caracteres</li>
+            <li>Combina letras mayúsculas y minúsculas</li>
+            <li>Incluye números y símbolos especiales</li>
+            <li>Evita usar información personal obvia</li>
+            <li>No reutilices contraseñas de otras cuentas</li>
+        </ul>
+    </div>
+</div>
 
-                <!-- Footer -->
-                <div class="footer">
-                    <p>Este enlace de restablecimiento expirará en 1 hora por tu seguridad.</p>
-                    <p>Si no solicitaste este cambio, tu cuenta permanece segura.</p>
-                    <p style="margin-top: 15px;">
-                        ¿Necesitas ayuda? <a href="mailto:'. $_ENV['RECIPIENT_EMAIL'] . '>Contáctanos</a>
-                    </p>
-                </div>
-            ';
+<div class="footer">
+    <p>Este enlace de restablecimiento expirará en 1 hora por tu seguridad.</p>
+    <p>Si no solicitaste este cambio, tu cuenta permanece segura.</p>
+    <p style="margin-top: 15px;">
+        ¿Necesitas ayuda? <a href="mailto:' . htmlspecialchars($_ENV['RECIPIENT_EMAIL']) . '">Contáctanos</a>
+    </p>
+</div>
+';
+
 
         $altMessage = "Haz clic en el botón para cambiar tu contraseña.";
-        $this->sendEmail($subject, $message, $altMessage, $email);
+        self::sendEmail($subject, $message, $altMessage, $email);
     }
 
     public static function sendWelcomeEmail(string $email, string $token): void {
-        $subject = "Activación de Cuenta - Aplicación de Notas";
+        $subject = "Activación de Cuenta - ".htmlspecialchars($_ENV['APP_NAME']);
         $message = '
-                    <!-- Contenido principal -->
-                    <div class="content">
-                        <div class="welcome-message">
-                            <h2>¡Bienvenido a MisNotas! 🎉</h2>
-                        </div>
+    <div class="content">
+        <div class="welcome-message">
+            <h2>¡Bienvenido a ' . htmlspecialchars($_ENV['APP_NAME']) . '! 🎉</h2>
+        </div>
 
-                        <div class="message-text">
-                            <p>Hola,</p>
-                            <p>¡Nos complace informarte que tu cuenta ha sido <strong>registrada exitosamente</strong> en nuestra aplicación de notas!</p>
-                            <p>Con MisNotas podrás:</p>
-                            <ul style="margin: 15px 0; padding-left: 20px;">
-                                <li>Crear y organizar todas tus notas</li>
-                                <li>Sincronizar tus datos en todos tus dispositivos</li>
-                                <li>Buscar rápidamente cualquier información</li>
-                                <li>Mantener tus notas seguras y privadas</li>
-                            </ul>
-                        </div>
+        <div class="message-text">
+            <p>Hola,</p>
+            <p>¡Nos complace informarte que tu cuenta ha sido <strong>registrada exitosamente</strong> en nuestra aplicación de notas!</p>
+            <p>Con ' . htmlspecialchars($_ENV['APP_NAME']) . ' podrás:</p>
+            <ul style="margin: 15px 0; padding-left: 20px;">
+                <li>Crear y organizar tus notas en diferentes cuadernos</li>
+                <li>Buscar rápidamente cualquier información</li>
+                <li>Mantener tus notas seguras y privadas</li>
+            </ul>
+        </div>
 
-                        <!-- Advertencia importante -->
-                        <div class="warning-box">
-                            <div class="warning-icon">⚠️</div>
-                            <p><strong>¡Importante!</strong> Tu cuenta aún no está activa. Debes activarla para poder acceder a todas las funcionalidades de la aplicación.</p>
-                        </div>
+        <div class="warning-box">
+            <div class="warning-icon">⚠️</div>
+            <p><strong>¡Importante!</strong> Tu cuenta aún no está activa. Debes activarla para poder acceder a todas las funcionalidades de la aplicación.</p>
+        </div>
 
-                        <!-- Sección de activación -->
-                        <div class="activation-section">
-                            <p class="activation-text">
-                                Para completar tu registro y comenzar a usar '.$_ENV['APP_NAME'].', haz clic en el siguiente botón:
-                            </p>
+        <div class="activation-section">
+            <p class="activation-text">
+                Para completar tu registro y comenzar a usar ' . htmlspecialchars($_ENV['APP_NAME']) . ', haz clic en el siguiente botón:
+            </p>
 
-                            <!-- <a href="'.$_ENV['DOMAIN'].'/index.php?action=active_account" class="activation-button">
-                                ✅ Activar mi cuenta
-                            </a> -->
+            <form action="' . htmlspecialchars($_ENV['DOMAIN']) . '/activate" method="post" style="display: inline;">
+                
+                <input type="hidden" name="activation_token" value="' . htmlspecialchars($token) . '">
+                
+                <input type="hidden" name="activate_user" value="' . htmlspecialchars($email) . '">
+                <button type="submit" name="activate_user" class="activation-button">
+                    ✅ Activar mi cuenta
+                </button>
+            </form>
 
-                            <form action="'.$_ENV['DOMAIN'].'" method="post" style="display: inline;">
-                                <input type="hidden" name="reset_token" value='. $token . '>
-                                <input type="hidden" name="activate_user" value="'.$email.'">
-                                <button type="submit" class="activation-button">
-                                    ✅ Activar mi cuenta
-                                </button>
-                            </form>
+        </div>
+    </div>
 
-                            <!-- <p style="margin-top: 20px; font-size: 14px; color: #888;">
-                                Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
-                                <span style="word-break: break-all; color: #FBB11E;">#ACTIVATION_LINK#</span>
-                            </p> -->
-                        </div>
-                    </div>
+    <div class="footer">
+        <p>Si no solicitaste esta cuenta, puedes ignorar este correo.</p>
+        <p style="margin-top: 15px;">
+            ¿Necesitas ayuda? <a href="mailto:' . htmlspecialchars($_ENV['RECIPIENT_EMAIL']) . '">Contáctanos</a>
+        </p>
+    </div>
+';
 
-                    <!-- Footer -->
-                    <div class="footer">
-                        <!-- <p>Este enlace de activación expirará en 24 horas por seguridad.</p> -->
-                        <p>Si no solicitaste esta cuenta, puedes ignorar este correo.</p>
-                        <p style="margin-top: 15px;">
-                            ¿Necesitas ayuda? <a href="'.$_ENV['RECIPIENT_EMAIL'].'">Contáctanos</a>
-                        </p>
-                    </div>';
-        $altMessage = "Tu usuario ha sido creado en la app de Notas. Activa tu cuenta haciendo clic en el enlace proporcionado.";
-        $this->sendEmail($subject, $message, $altMessage, $email);
+        $altMessage = "Tu usuario ha sido creado en ".htmlspecialchars($_ENV['APP_NAME']).". Activa tu cuenta haciendo clic en el enlace proporcionado.";
+        self::sendEmail($subject, $message, $altMessage, $email);
     }
 
     /* MÉTODOS PRIVADOS */
-    private function sendEmail(string $subject, string $message, string $altMessage, string $email): void {
+    private static function sendEmail(string $subject, string $message, string $altMessage, string $email): void {
         try {
             // Create a new PHPMailer instance
             $mail = new PHPMailer(true);
         
+            $mail->CharSet = 'UTF-8';
+            
             // Server settings
             $mail->isSMTP();                                    // Send using SMTP
             $mail->Host       = $_ENV['EMAIL_HOST'];               // Set the SMTP server
@@ -200,6 +186,7 @@ class EmailService {
                         max-width: 600px;
                         margin: 0 auto;
                         background: white;
+                        border: 1px solid black;
                         border-radius: 12px;
                         overflow: hidden;
                         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -424,7 +411,7 @@ class EmailService {
             <div class="email-container">
                 <!-- Header -->
                 <div class="header">
-                    <h1>🔐 '.$_ENV['APP_NAME'].'</h1>
+                    <h1>🔐 '.htmlspecialchars($_ENV['APP_NAME']).'</h1>
                     <p>Tu aplicación personal de notas</p>
                 </div>';
 

@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once 'app/services/requests/PostManager.php';
+
 require_once 'app/controllers/ErroresController.php';
 
 require_once 'vendor/autoload.php';
@@ -8,177 +10,84 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
 class App{
+    private $controller;
 
     function __construct(){
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            $this->validarPOST();
-        }
-        $url = isset($_GET['url']) ? $_GET['url']: '/';
-        $url = rtrim($url, '/');
-        $url = explode('/', $url);
+            $request = new PostManager();
+            if($request->isValid && !empty($request->postKey)){
+                switch ($request->postKey) {
+                    case 'create_user':
+                        require_once 'app/controllers/UserController.php';
+                        $this->controller = new UserController();
+                        $this->controller->checkCurrentModel('UserModel');
+                        $email = $_POST['email'];
+                        $password = $_POST['password'];
+                        $confirmPassword = $_POST['confirm_password'];
+                        $username = $_POST['username'];
+                        $this->controller->register($email, $password, $confirmPassword, $username);
+                        break;
+        
+                    default:
+                        $this->controller = new ErroresController('La solicitud no está disponible en estos momentos.');
+                        break;
+                }
+            } else {
+                $this->controller = new ErroresController($request->message);
+            }
 
-        // cuando se ingresa sin definir controlador
-        if(empty($url[0])){
-            $archivoController = 'app/controllers/MainController.php';
-            require_once $archivoController;
-            $controller = new MainController();
-            $controller->loadModel('Main');
-            $controller->render();
-            return false;
-        }
+        } else {
+            $url = isset($_GET['url']) ? $_GET['url']: '/';
+            $url = rtrim($url, '/');
+            $url = explode('/', $url);
 
-        $name = ucfirst($url[0]);
-        $archivoController = 'app/controllers/' . $name . 'Controller.php';
+            // cuando se ingresa sin definir controlador
+            if(empty($url[0])){
+                $archivoController = 'app/controllers/MainController.php';
+                require_once $archivoController;
+                $this->controller = new MainController();
+                #$this->controller->loadModel('main');
+                $this->controller->render();
+                return false;
+            }
 
-        if(file_exists($archivoController)){
-            require_once $archivoController;
+            $name = $url[0];
+            $infoController = Controller::getInfoController($name);
+            $archivoController = $infoController['file'];
 
-            $urlController = $name . 'Controller';
-            // inicializar controlador
-            $controller = new $urlController;
-            $controller->loadModel($name);
-            
-            // # elementos del arreglo
-            $nparam = sizeof($url);
+            if(file_exists($archivoController)){
+                require_once $archivoController;
 
-            if($nparam > 1){
-                if($nparam > 2){
-                    $param = [];
-                    for($i = 2; $i<$nparam; $i++){
-                        array_push($param, $url[$i]);
+                if (!SessionManager::has('csrf_token')) SessionManager::set('csrf_token', bin2hex(random_bytes(32)));
+
+                #$urlController = $name . 'Controller';
+                $urlController = $infoController['controller'];
+                // inicializar controlador
+                $this->controller = new $urlController;
+                #$this->controller->loadModel($name);
+                
+                // elementos del arreglo
+                $nparam = sizeof($url);
+
+                if($nparam > 1){
+                    if($nparam > 2){
+                        $param = [];
+                        for($i = 2; $i<$nparam; $i++){
+                            array_push($param, $url[$i]);
+                        }
+                        $this->controller->{$url[1]}($param);
+                    }else{
+                        $this->controller->{$url[1]}();
                     }
-                    $controller->{$url[1]}($param);
                 }else{
-                    $controller->{$url[1]}();
+                    $this->controller->render();
                 }
             }else{
-                $controller->render();
-            }
-        }else{
-            $controller = new ErroresController();
-        }
-    }
-
-    /**
-     * Valida las solicitudes POST
-     * Verifica CSRF token, Content-Type y tamaño del payload
-     */
-    private function validarPOST(): void {
-        // 1. Validar CSRF Token
-        if(!$this->validarCSRFToken()){
-            $this->mostrarError('Token de seguridad inválido. Por favor, recarga la página e intenta nuevamente.');
-        }
-
-        // 2. Validar Content-Type para formularios exclusivas de la propia aplicación y no desde JSON o API
-        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-        
-        if(!empty($_POST) || !empty($_FILES)){
-            $esFormulario = strpos($contentType, 'application/x-www-form-urlencoded') !== false ||
-                           strpos($contentType, 'multipart/form-data') !== false;
-
-            if(!$esFormulario){
-                $this->mostrarError('Tipo de contenido no válido. No hay soporte para JSON/API en estos momentos.');
+                $this->controller = new ErroresController("Error 404: La página solicitada no existe.");
             }
         }
-
-        //3. Sanitizar datos POST
-        $this->sanitizarDatosPOST();
-
-        // 4. Validar que la petición viene del mismo sitio
-        if(!$this->validarReferer()){
-            $this->mostrarError('La solicitud no proviene de una fuente válida.');
-        }
     }
-
-    /**
-     * Valida el token CSRF
-     */
-    private function validarCSRFToken(): bool {
-        // Obtener token del POST
-        $token = $_POST['csrf_token'] ?? null;
-        
-        // Validar que exista token en sesión y en POST
-        if(!isset($_SESSION['csrf_token']) || empty($token)){
-            return false;
-        }
-
-        // Comparación segura contra timing attacks
-        return hash_equals($_SESSION['csrf_token'], $token);
-    }
-
-    /**
-     * Sanitiza los datos POST recursivamente
-     */
-    private function sanitizarDatosPOST(): void {
-        if(!empty($_POST)){
-            $_POST = $this->sanitizarArray($_POST);
-        }
-    }
-
-    /**
-     * Sanitiza un array recursivamente
-     */
-    private function sanitizarArray(array $data): array {
-        $sanitizado = [];
-        foreach($data as $key => $value){
-            // Sanitizar la clave
-            $keySanitizada = $this->sanitizarString($key);
-            
-            if(is_array($value)){
-                $sanitizado[$keySanitizada] = $this->sanitizarArray($value);
-            }else{
-                $sanitizado[$keySanitizada] = $this->sanitizarString($value);
-            }
-        }
-        return $sanitizado;
-    }
-
-    /**
-     * Sanitiza un string
-     */
-    private function sanitizarString(string $value): string {
-        // Eliminar caracteres nulos que pueden causar problemas
-        $value = str_replace(chr(0), '', $value);
-        // Eliminar espacios al inicio y final
-        $value = trim($value);
-        // Eliminar caracteres de control excepto saltos de línea y tabs
-        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
-        
-        return $value;
-    }
-
-    /**
-     * Valida que la petición venga del mismo sitio (Referer)
-     */
-    private function validarReferer(): bool {
-        $referer = $_SERVER['HTTP_REFERER'] ?? '';
-        $host = $_SERVER['HTTP_HOST'] ?? '';
-        $esquema = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $urlBase = $esquema . '://' . $host;
-
-        // Si no hay referer, rechazar (los navegadores modernos siempre lo envían)
-        if(empty($referer)){
-            return false;
-        }
-
-        // Validar que el referer inicie con la URL base del sitio
-        return strpos($referer, $urlBase) === 0;
-    }
-
-    /**
-     * Muestra un error de validación y detiene la ejecución
-     */
-    private function mostrarError(string $mensaje): void {
-        // Guardar mensaje en sesión para mostrarlo después del redirect
-        $_SESSION['error_validacion'] = $mensaje;
-        
-        // Obtener la URL de donde venía (referer) o redirigir al inicio
-        $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-        
-        // Redirigir de vuelta con el error
-        header('Location: ' . $referer);
-        exit;
-    }
+    
 }
 
 ?>

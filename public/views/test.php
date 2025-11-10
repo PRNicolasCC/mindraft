@@ -24,6 +24,7 @@
                         margin: 0 auto;
                         background: white;
                         border-radius: 12px;
+                        border: 1px solid black;
                         overflow: hidden;
                         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
                     }
@@ -245,7 +246,7 @@
             </head>
             <body>
 
-<div class="email-container">
+                <div class="email-container">
                     <!-- Header -->
                     <div class="header">
                         <h1>📝 MisNotas</h1>

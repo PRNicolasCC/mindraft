@@ -23,13 +23,7 @@ class UserModel extends Model {
         return $this->db->fetchOne($sql, ['email' => $email]);
     }
 
-    public static function crear(string $email, string $password_hash, string $nombre): ?array {
-        $this->validateUserData([
-            'email' => $email,
-            'nombre' => $nombre,
-            'password' => $password_hash,
-        ], true);
-
+    public function crear(string $email, string $password_hash, string $nombre): ?array {
         $sql = "INSERT INTO {$this->table} (email, contraseña, nombre) VALUES (:email, :pass, :nombre)";
         
         $parametros = [
@@ -50,64 +44,12 @@ class UserModel extends Model {
                 'token' => $token
             ];
         }
-
-        return [];
         
     }
     
     /* public function obtenerPorId(int $id): ?array {
         // ... (Implementación similar a obtenerPorEmail) ...
     } */
-
-
-    /* MÉTODOS PRIVADOS */
-
-    /** 
-     * Valida los datos del usuario.
-     * @param array $data Los datos del usuario a validar.
-     * @param bool $isCreate Indica si es una operación de creación (true) o actualización (false).
-     **/
-    private function validateUserData(array $data, bool $isCreate = true): void {
-        if ($isCreate) {
-            $required = ['email', 'nombre', 'password'];
-            foreach ($required as $field) {
-                if (empty($data[$field])) {
-                    throw new InvalidArgumentException("El campo '$field' es requerido.");
-                }
-            }
-
-            #$this->validatePassword($data['password']);
-        }
-
-        if (isset($data['email']) && !empty($data['email'])) {
-            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-                throw new InvalidArgumentException('Formato de correo inválido.');
-            }
-        }
-    }
-
-    /** 
-     * Valida los datos del usuario.
-     * @param string $password La contraseña a validar.
-     **/
-    /* private function validatePassword(string $password): void {
-        if (strlen($password) < self::PASSWORD_MIN_LENGTH) {
-            throw new InvalidArgumentException('Password must be at least ' . self::PASSWORD_MIN_LENGTH . ' characters long');
-        } */
-        
-        // Validaciones adicionales de complejidad
-        /* if (!preg_match('/[A-Z]/', $password)) {
-            throw new InvalidArgumentException('Password must contain at least one uppercase letter');
-        }
-        
-        if (!preg_match('/[a-z]/', $password)) {
-            throw new InvalidArgumentException('Password must contain at least one lowercase letter');
-        }
-        
-        if (!preg_match('/\d/', $password)) {
-            throw new InvalidArgumentException('Password must contain at least one number');
-        } */
-    /* } */
     
 }
 
