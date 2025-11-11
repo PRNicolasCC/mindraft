@@ -15,30 +15,10 @@ class App{
     function __construct(){
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             $request = new PostManager();
-            if($request->isValid && !empty($request->postKey)){
-                switch ($request->postKey) {
-                    case 'create_user':
-                        require_once 'app/controllers/UserController.php';
-                        $this->controller = new UserController();
-                        $this->controller->checkCurrentModel('UserModel');
-                        $email = $_POST['email'];
-                        $password = $_POST['password'];
-                        $confirmPassword = $_POST['confirm_password'];
-                        $username = $_POST['username'];
-                        $this->controller->register($email, $password, $confirmPassword, $username);
-                        break;
-        
-                    default:
-                        $this->controller = new ErroresController('La solicitud no está disponible en estos momentos.');
-                        break;
-                }
-            } else {
-                $this->controller = new ErroresController($request->message);
-            }
-
+            if(!empty($request->errorMessage)) $this->controller = new ErroresController($request->errorMessage);
         } else {
-            $url = isset($_GET['url']) ? $_GET['url']: '/';
-            $url = rtrim($url, '/');
+            $urlCompleta = isset($_GET['url']) ? $_GET['url']: '/';
+            $url = rtrim($urlCompleta, '/');
             $url = explode('/', $url);
 
             // cuando se ingresa sin definir controlador
@@ -46,7 +26,6 @@ class App{
                 $archivoController = 'app/controllers/MainController.php';
                 require_once $archivoController;
                 $this->controller = new MainController();
-                #$this->controller->loadModel('main');
                 $this->controller->render();
                 return false;
             }
@@ -61,9 +40,9 @@ class App{
                 if (!SessionManager::has('csrf_token')) SessionManager::set('csrf_token', bin2hex(random_bytes(32)));
 
                 #$urlController = $name . 'Controller';
-                $urlController = $infoController['controller'];
+                $controller = $infoController['controller'];
                 // inicializar controlador
-                $this->controller = new $urlController;
+                $this->controller = new $controller;
                 #$this->controller->loadModel($name);
                 
                 // elementos del arreglo

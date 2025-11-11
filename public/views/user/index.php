@@ -6,6 +6,8 @@ $propsAuth = array(
     'sendButton' => 'Ingresar',
 );
 
+$previousEmail = isset($this->inputs['email']) ? $this->inputs['email'] : '';
+
 $childrenAuth = '
             <div class="form-floating">
                 <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
@@ -14,6 +16,7 @@ $childrenAuth = '
                     name="emailLogin"
                     id="email"
                     class="form-control border border-warning"
+                    value="'.htmlspecialchars($previousEmail) .'"
                     placeholder=""
                     required
                     autofocus
@@ -44,8 +47,7 @@ $childrenAuth = '
 
 $aditionalAuth = '<div class="text-center p-5">
                 <p><a href="'.htmlspecialchars($_ENV['DOMAIN']).'/password" target="_blank" rel="noopener noreferrer" class="link_general">¿Olvidaste la contraseña?</a></p>
-                <!-- <br>
-                <p><div class="link_register px-3 py-2 rounded-1"><a href="'.htmlspecialchars($_ENV['DOMAIN']).'/user" class="link_register px-3">Crear cuenta nueva</a></div></p> -->
+                <p><div class="link_register px-3 py-2 rounded-1"><a href="'.htmlspecialchars($_ENV['DOMAIN']).'/user" class="link_register px-3">Crear cuenta nueva</a></div></p>
             </div>';
 
 $scriptsAuth = '<script src="public/js/user/index.js"></script>

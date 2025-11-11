@@ -20,7 +20,7 @@ document.getElementById('sendForm').addEventListener('submit', function(e) {
         return;
     }
 
-    validateEmail(email)
+    if (!validateEmail(email, e)) return;
 
     if (password !== confirmPassword) {
         e.preventDefault();

@@ -7,6 +7,7 @@
 
                 <!-- Formulario -->
                 <form action="" method="post" id="sendForm">
+                    <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
                     ' . $childrenAuth . '
                     <button type="submit" class="btn btn-register" id="sendButton">
                         <span class="btn-text">'.htmlspecialchars($propsAuth['sendButton']).'</span>

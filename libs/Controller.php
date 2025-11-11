@@ -1,16 +1,30 @@
 <?php
 declare(strict_types=1);
 
-class Controller{
+abstract class Controller{
     public $view;
     public $model;
 
-    public function __construct(string $model = ''){
+    /**
+     * Constructor de la clase Controller.
+     * 
+     * Inicializa la vista y el modelo
+     * 
+     * @param string $model El nombre del modelo en minúscula
+     * @return void
+    */
+    function __construct(string $model = ''){
         $this->view = new View();
-        if($model !== '') $this->loadModel($model);
+        $this->loadModel($model);
     }
 
-    public function loadModel(string $model): void {
+    /**
+     * Carga el modelo correspondiente
+     * 
+     * @param string $model El nombre del modelo en minúscula
+     * @return void
+    */
+    function loadModel(string $model): void {
         $model = ucfirst($model);
         $url = 'app/models/'.$model.'Model.php';
 
@@ -21,16 +35,11 @@ class Controller{
         }
     }
 
-    public function checkCurrentModel(string $model): void{
-        $clase = get_class($this->model);
-        if ($clase !== $model) {
-            $this->view->cambiarError('El modelo no coincide con el controlador');
-        }
-    }
-
     /**
-     * Obtener un controlador específico
+     * Obtiene la información de un controlador específico
+     * 
      * @param string $name El nombre del controlador en minúscula
+     * @return array
     */
     public static function getInfoController(string $name): array{
         $name = ucfirst($name);

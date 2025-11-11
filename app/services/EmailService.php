@@ -9,9 +9,7 @@ require 'vendor/autoload.php';
 
 class EmailService {
     /* MÉTODOS PÚBLICOS */
-    public static function sendEmailRecuperacion(string $email): void {
-        // Generar token criptográficamente seguro
-        $reset_token = bin2hex(random_bytes(32)); // 64 caracteres hexadecimales
+    static function sendEmailRecuperacion(string $email, string $token): void {
 
         $subject = "Recuperación de Contraseña - ". htmlspecialchars($_ENV['APP_NAME']);
         $message = '
@@ -38,8 +36,8 @@ class EmailService {
         </p>
 
         <form action="' . htmlspecialchars($_ENV['DOMAIN']) . '" method="post" style="display: inline;">
-            
-            <input type="hidden" name="reset_token" value="' . htmlspecialchars($reset_token) . '">
+            <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
+            <input type="hidden" name="token" value="' . htmlspecialchars($token) . '">
             
             <input type="hidden" name="email" value="' . htmlspecialchars($email) . '">
             
@@ -81,8 +79,10 @@ class EmailService {
         self::sendEmail($subject, $message, $altMessage, $email);
     }
 
-    public static function sendWelcomeEmail(string $email, string $token): void {
+    static function sendWelcomeEmail(string $email, string $token): void {
         $subject = "Activación de Cuenta - ".htmlspecialchars($_ENV['APP_NAME']);
+
+        $enlace_activacion = htmlspecialchars($_ENV['DOMAIN'])."/user/activate/{$token}/{$email}";
         $message = '
     <div class="content">
         <div class="welcome-message">
@@ -102,7 +102,8 @@ class EmailService {
 
         <div class="warning-box">
             <div class="warning-icon">⚠️</div>
-            <p><strong>¡Importante!</strong> Tu cuenta aún no está activa. Debes activarla para poder acceder a todas las funcionalidades de la aplicación.</p>
+            <p><strong>¡Importante!</strong> Tu cuenta aún no está activa. Debes activarla para poder acceder a todas las funcionalidades de la aplicación.
+            Tienes 24 horas a pertir del registro de la cuenta para completar la activación.</p>
         </div>
 
         <div class="activation-section">
@@ -110,15 +111,17 @@ class EmailService {
                 Para completar tu registro y comenzar a usar ' . htmlspecialchars($_ENV['APP_NAME']) . ', haz clic en el siguiente botón:
             </p>
 
-            <form action="' . htmlspecialchars($_ENV['DOMAIN']) . '/activate" method="post" style="display: inline;">
+            <!--<form action="' . htmlspecialchars($_ENV['DOMAIN']) . '" method="post" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
+                <input type="hidden" name="token" value="' . htmlspecialchars($token) . '">
                 
-                <input type="hidden" name="activation_token" value="' . htmlspecialchars($token) . '">
-                
-                <input type="hidden" name="activate_user" value="' . htmlspecialchars($email) . '">
+                <input type="hidden" name="email" value="' . htmlspecialchars($email) . '">
                 <button type="submit" name="activate_user" class="activation-button">
                     ✅ Activar mi cuenta
                 </button>
-            </form>
+            </form> -->
+
+            <a href="' . $enlace_activacion . '" class="activation-button">✅ Activar mi cuenta</a>
 
         </div>
     </div>
@@ -135,7 +138,7 @@ class EmailService {
         self::sendEmail($subject, $message, $altMessage, $email);
     }
 
-    /* MÉTODOS PRIVADOS */
+
     private static function sendEmail(string $subject, string $message, string $altMessage, string $email): void {
         try {
             // Create a new PHPMailer instance

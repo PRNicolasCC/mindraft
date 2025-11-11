@@ -5,9 +5,10 @@ class View{
     private array $icons;
     public array $message;
     public array $inputs;
+    private string $redirect;
 
-    /* MÉTODOS PÚBLICOS */
-    function __construct(){
+    function __construct(string $redirect = ''){
+        $this->redirect = $redirect;
         $this->icons = [
             'error' => 'fa-exclamation-triangle',
             'success' => 'fa-check-circle', 
@@ -23,26 +24,34 @@ class View{
         $this->inputs = [];
     }
 
-    public function render(string $nombre): void{
-        require 'public/views/' . $nombre . '.php';
+    function setRedirect(string $redirect): void{
+        $this->redirect = $redirect;
     }
 
-    public function successRedirect(string $mensaje, string $redirect): void{
+    function render(): void{
+        require 'public/views/' . $this->redirect . '.php';
+    }
+
+    function successRedirect(string $mensaje, array $inputs = [], string $redirect = ''): void{
         $this->setMessageAndIcon($mensaje, 'success');
-        #$this->redirect();
-        $this->render($redirect);
+        $this->inputs = $inputs;
+        if ($redirect !== '') $this->redirect = $redirect;
+        $this->render();
     }
 
     /**
      * Cambia el error de validación general de la aplicación 
      */
-    public function cambiarError(string $mensaje): void {
+    function cambiarError(string $mensaje, array $inputs = [], string $redirect = ''): void {
         // Guardar mensaje en sesión para mostrarlo después del redirect
         $this->setMessageAndIcon($mensaje, 'error');
-        #$this->render('user/register');
+        $this->inputs = $inputs;
+        if ($redirect !== '') $this->redirect = $redirect;
+        $this->render();
+        exit();
     }
 
-    public function getDescriptionMessage(): ?string{
+    function getDescriptionMessage(): ?string{
         if ($this->message['description'] !== ''){
             return '<div class="message ' . htmlspecialchars($this->message['type'] ?? 'info') . '">
                 <i class="fa-solid ' . htmlspecialchars($this->getMessageIcon()) . '"></i>'
@@ -53,7 +62,6 @@ class View{
     }
 
 
-    /* MÉTODOS PRIVADOS */
     private function setMessageAndIcon(string $description, string $type): void {
         $this->message['description'] = $description;
         $this->message['type'] = $type;

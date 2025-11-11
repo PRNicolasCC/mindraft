@@ -16,3 +16,5 @@ class PasswordController extends Controller {
         $this->view->render($view);
     }
 }
+
+?>

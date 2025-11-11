@@ -2,22 +2,52 @@
 declare(strict_types=1);
 
 class PostManager {
-    public bool $isValid;
-    public string $postKey;
-    public string $message;
+    public string $errorMessage;
 
+    /**
+     * Constructor de la clase PostManager.
+     * 
+     * Valida si la solicitud es de tipo POST y, en caso afirmativo, procesa la acción
+     * correspondiente según el parámetro POST recibido. Las acciones disponibles se definen
+     * en el array $postActions, donde cada clave es el nombre del parámetro POST y el valor
+     * es un array con el controlador y método que deben ejecutarse.
+     *
+     * Es importante no asignar valor alguno a $this->errorMessage ya que se utiliza para mostrar mensajes de error
+     * y el constructor está planeado para procesar la solicitud cuando no hay ningun error.
+     * 
+     * @return void
+     */
     function __construct(){
-        if($this->validarPOST()) $this->isValid = $this->gestionarPOST();
+        if($this->validarPOST()){
+            $userActions = [
+                'create_user' => ['user', 'register'],
+                'login' => ['user', 'login'],
+            ];
+            $postActions = array_merge($userActions);
+
+            foreach ($postActions as $postKey => $contr) {
+                if (isset($_POST[$postKey])) {
+                    $infoController = Controller::getInfoController($contr[0]);
+                    require_once $infoController['file'];
+                    $controller = $infoController['controller'];
+                    $postController = new $controller;
+                    $method = $contr[1];
+                    $postController->$method($_POST);
+                }
+            }
+        }
     }
 
     /**
      * Valida las solicitudes POST
      * Verifica CSRF token, Content-Type y tamaño del payload
+     * 
+     * @return bool
      */
     private function validarPOST(): bool {
         // 1. Validar CSRF Token
         if(!$this->validarCSRFToken()){
-            $this->message = 'Token de seguridad inválido. Por favor, recarga la página e intenta nuevamente.';
+            $this->errorMessage = 'Token de seguridad inválido. Por favor, recarga la página e intenta nuevamente.';
             return false;
         }
 
@@ -29,7 +59,7 @@ class PostManager {
                            strpos($contentType, 'multipart/form-data') !== false;
 
             if(!$esFormulario){
-                $this->message = 'Tipo de contenido no válido. No hay soporte para API en estos momentos.';
+                $this->errorMessage = 'Tipo de contenido no válido. No hay soporte para API en estos momentos.';
                 return false;
             }
         }
@@ -39,7 +69,7 @@ class PostManager {
 
         // 4. Validar que la petición viene del mismo sitio
         if(!$this->validarReferer()){
-            $this->message = 'La solicitud no proviene de una fuente válida.';
+            $this->errorMessage = 'La solicitud no proviene de una fuente válida.';
             return false;
         }
 
@@ -47,32 +77,9 @@ class PostManager {
     }
 
     /**
-     * Gestiona y procesa la información enviada por POST
-     */
-    private function gestionarPOST(): bool {
-        // 1. Procesar archivos subidos
-        /* if(!empty($_FILES)){
-            $this->procesarArchivos();
-        } */
-
-        $postActions = [
-            'create_user',
-            'activate_user',
-            'login',
-        ];
-
-        foreach ($postActions as $postKey) {
-            if (isset($_POST[$postKey])) {
-                $this->postKey = $postKey;
-                return true;
-            }
-
-            return false;
-        }
-    }
-
-    /**
      * Valida el token CSRF
+     * 
+     * @return bool
      */
     private function validarCSRFToken(): bool {
         // Obtener token del POST
@@ -89,6 +96,8 @@ class PostManager {
 
     /**
      * Sanitiza los datos POST recursivamente
+     * 
+     * @return void
      */
     private function sanitizarDatosPOST(): void {
         if(!empty($_POST)){
@@ -98,6 +107,9 @@ class PostManager {
 
     /**
      * Sanitiza un array recursivamente
+     * 
+     * @param array $data El array a sanitizar
+     * @return array
      */
     private function sanitizarArray(array $data): array {
         $sanitizado = [];
@@ -116,6 +128,9 @@ class PostManager {
 
     /**
      * Sanitiza un string
+     * 
+     * @param string $value El string a sanitizar
+     * @return string
      */
     private function sanitizarString(string $value): string {
         // Eliminar caracteres nulos que pueden causar problemas
@@ -130,6 +145,8 @@ class PostManager {
 
     /**
      * Valida que la petición venga del mismo sitio (Referer)
+     * 
+     * @return bool
      */
     private function validarReferer(): bool {
         $referer = $_SERVER['HTTP_REFERER'] ?? '';
@@ -145,60 +162,6 @@ class PostManager {
         // Validar que el referer inicie con la URL base del sitio
         return strpos($referer, $urlBase) === 0;
     }
-
-    /**
-     * Procesa y valida archivos subidos
-     */
-    /* private function procesarArchivos(): void {
-        foreach($_FILES as $campo => &$archivo){
-            // Si es un array de archivos múltiples
-            if(is_array($archivo['name'])){
-                continue; // Los procesa el controlador específico
-            }
-
-            // Verificar si hubo error en la subida
-            if($archivo['error'] !== UPLOAD_ERR_OK){
-                $mensajesError = [
-                    UPLOAD_ERR_INI_SIZE => 'El archivo excede el tamaño máximo permitido',
-                    UPLOAD_ERR_FORM_SIZE => 'El archivo excede el tamaño máximo del formulario',
-                    UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente',
-                    UPLOAD_ERR_NO_FILE => 'No se subió ningún archivo',
-                    UPLOAD_ERR_NO_TMP_DIR => 'Falta carpeta temporal',
-                    UPLOAD_ERR_CANT_WRITE => 'Error al escribir el archivo',
-                    UPLOAD_ERR_EXTENSION => 'Extensión de PHP detuvo la subida'
-                ];
-
-                $mensaje = $mensajesError[$archivo['error']] ?? 'Error desconocido al subir archivo';
-                $this->cambiarError($mensaje);
-            }
-
-            // Validar tamaño máximo (5MB por defecto)
-            $maxSize = 5 * 1024 * 1024; // 5MB
-            if($archivo['size'] > $maxSize){
-                $this->cambiarError('El archivo ' . htmlspecialchars($campo) . ' es demasiado grande (máx 5MB)');
-            }
-
-            // Validar que sea realmente un archivo subido
-            if(!is_uploaded_file($archivo['tmp_name'])){
-                $this->cambiarError('El archivo no es válido');
-            }
-
-            // Detectar tipo MIME real del archivo
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mimeReal = finfo_file($finfo, $archivo['tmp_name']);
-            finfo_close($finfo);
-
-            $archivo['mime_real'] = $mimeReal;
-
-            // Validar extensiones peligrosas
-            $extension = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
-            $extensionesProhibidas = ['php', 'phtml', 'php3', 'php4', 'php5', 'php7', 'phps', 'pht', 'phar', 'exe', 'sh', 'bat', 'cmd'];
-            
-            if(in_array($extension, $extensionesProhibidas)){
-                $this->cambiarError('Tipo de archivo no permitido');
-            }
-        }
-    } */
 }
 
 ?>

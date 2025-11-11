@@ -13,7 +13,7 @@ document.getElementById('sendForm').addEventListener('submit', function(e) {
         return;
     }
 
-    validateEmail(email)
+    if (!validateEmail(email, e)) return;
 
     // Show loading state
     showLoadingState(button, btnText, spinner)

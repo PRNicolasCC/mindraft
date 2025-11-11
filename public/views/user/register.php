@@ -11,7 +11,6 @@ $previousUsername = isset($this->inputs['username']) ? $this->inputs['username']
 
 $childrenAuth = '
             <div class="form-floating">
-                <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
                 <input
                     type="email"
                     name="email"

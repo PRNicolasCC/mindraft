@@ -11,7 +11,7 @@ class DBConnection {
 
     private ?PDO $conn = null;
 
-    public function __construct(
+    function __construct(
         ?string $host = null,
         ?string $port = null, 
         ?string $db = null,
@@ -28,7 +28,7 @@ class DBConnection {
     }
 
     // Patrón Lazy Loading: evita conexiones innecesarias si la clase se instancia pero no se usa.
-    public function getConnection(): PDO {
+    private function getConnection(): PDO {
         if ($this->conn === null) {
             $this->conn = $this->connect();
         }
@@ -73,48 +73,57 @@ class DBConnection {
         }
     }
 
-    public function query(string $sql, array $params = []): PDOStatement {
+    private function query(string $sql, array $params = []): PDOStatement {
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
-    public function fetchAll(string $sql, array $params = []): array {
+    function fetchAll(string $sql, array $params = []): array {
         return $this->query($sql, $params)->fetchAll();
     }
 
-    public function fetchOne(string $sql, array $params = []): ?array {
+    function fetchOne(string $sql, array $params = []): ?array {
         $result = $this->query($sql, $params)->fetch();
         return $result ?: null;  # El operador (?:) es llamado Operador Ternario Conciso y devuelve null si $result es false
     }
 
-    public function ejecutar(string $sql, array $params = []): int {
+    function ejecutar(string $sql, array $params = []): int {
         # El resultado de rowCount puede ser cero para INSERT (no es el caso para el presente proyecto) debido a diferentes razones:
-            # Comportamiento específico del driver MySQL: Algunos drivers de MySQL retornan 0 para INSERT cuando no hay filas "afectadas" en el sentido tradicional (como en UPDATE o DELETE).
-            # Configuración de PDO: Con PDO::ATTR_EMULATE_PREPARES => false, el comportamiento de rowCount() puede ser inconsistente para INSERT.
-            # Versión de MySQL/MariaDB: Diferentes versiones pueden tener comportamientos distintos.
-        return $this->query($sql, $params)->rowCount();
+        # Comportamiento específico del driver MySQL: Algunos drivers de MySQL retornan 0 para INSERT cuando no hay filas "afectadas" en el sentido tradicional (como en UPDATE o DELETE).
+        # Configuración de PDO: Con PDO::ATTR_EMULATE_PREPARES => false, el comportamiento de rowCount() puede ser inconsistente para INSERT.
+        # Versión de MySQL/MariaDB: Diferentes versiones pueden tener comportamientos distintos.
+        # Es por ello que se agrega la siguiente modificación para los casos de inserción:
+
+        $ejecucion = $this->query($sql, $params);
+        // Usamos una expresión regular simple: /^INSERT/i
+        if (preg_match('/^INSERT/i', trim($sql))) {
+            return $this->ultimoIdInsertado();
+        }
+
+        // Para UPDATE, DELETE y otras, rowCount() es el método apropiado:
+        return $ejecucion->rowCount();
     }
 
-    public function ultimoIdInsertado(): string {
-        return $this->getConnection()->lastInsertId();
+    function ultimoIdInsertado(): int {
+        return (int) $this->getConnection()->lastInsertId();
     }
 
-    public function beginTransaction(): bool {
+    function beginTransaction(): bool {
         return $this->getConnection()->beginTransaction();
     }
 
-    public function commit(): bool {
+    function commit(): bool {
         return $this->getConnection()->commit();
     }
 
-    public function rollback(): bool {
+    function rollback(): bool {
         return $this->getConnection()->rollback();
     }
 
     // Limpia la conexión a la base de datos: Cierra apropiadamente la conexión PDO, Libera recursos de memoria, Evita conexiones "zombi" que consuman recursos del servidor
     // Es decir que al terminar de realizar cualquier funcion o funciones, __destruct cierra automáticamente la conexión a la base de datos.
-    public function __destruct() {
+    function __destruct() {
         $this->conn = null;
     }
 

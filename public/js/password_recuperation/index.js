@@ -15,7 +15,7 @@ document.getElementById('sendForm').addEventListener('submit', function(e) {
         return;
     }
 
-    validateEmail(email);
+    if (!validateEmail(email, e)) return;
     showLoadingState(button, btnText, spinner);
 
     // Simulate API call
