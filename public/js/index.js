@@ -1,14 +1,3 @@
-// Email validation
-function validateEmail(email, e) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        e.preventDefault();
-        showMessage('Por favor ingresa un email válido', 'error');
-        return false;
-    }
-    return true;
-}
-
 // Get message icon for JavaScript
 function getMessageIconJs(type) {
     const icons = {

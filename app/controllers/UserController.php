@@ -6,19 +6,42 @@ require_once 'app/services/EmailService.php';
 class UserController extends Controller {
     private const PASSWORD_MIN_LENGTH = 8;
     private const PASSWORD_MAX_LENGTH = 30;
-    private const REDIRECT = 'user/register';
+    private array $tokenMethods;
 
-    /* MÉTODOS PÚBLICOS */
-    public function __construct(){
+    function __construct(){
         parent::__construct('user');
-        $this->view->setRedirect(self::REDIRECT);
+        $this->setGetActions([
+            'password_form',
+            'password',
+            'activate',
+            'passwordReset',
+        ]);
+        $this->tokenMethods = [
+            'activate',
+            'passwordReset',
+        ];
     }
 
-    public function render(): void{
-        $this->view->render();
+    function getTokenMethods(): array {
+        return $this->tokenMethods;
     }
 
-    public function register(array $data): void{
+    function render(): void{
+        $this->view->render('user/register');
+    }
+
+    function password(): void {
+        $this->view->render('user/password');
+    }
+
+    function password_form(): void {
+        if (!SessionManager::has('redirectInputs') || !isset(SessionManager::get('redirectInputs')['email']) || !isset(SessionManager::get('redirectInputs')['token'])) {
+            $this->redirect('/');
+        }
+        $this->view->render('user/password_form');
+    }
+
+    function register(array $data): void{
         $this->validateUserData([
             'email' => $data['email'],
             'username' => $data['username'],
@@ -35,70 +58,121 @@ class UserController extends Controller {
                 $datosUsuario['token']
             );
 
-            $this->view->successRedirect(
-                '✅ Usuario registrado correctamente. Por favor, verifica la cuenta con el mensaje enviado a tu correo electrónico para habilitar el inicio de sesión',                 
+            $this->successRedirect(
+                'Usuario registrado correctamente. Se ha enviado un correo electrónico con un enlace para activar tu cuenta',                 
                 [],
-                'user/index'
+                '/'
             );
         } else {
-            $this->view->cambiarError('Error al registrar el usuario. Por favor contacte al administrador');
+            $this->cambiarError('Error al registrar el usuario. Por favor contacte al administrador');
         }
     }
 
-    public function activate(array $data): void{
+    function activate(array $data): void{
         $this->validateUserData([
             'email' => $data[1],
         ], false);
 
         $isActive = $this->model->activar($data[1], $data[0]);
 
-        if ($isActive) {
-            /* $this->view->successRedirect(
-                '🎉 Usuario activado correctamente. Ahora puedes iniciar sesión', 
+        if (gettype($isActive) === 'string') {
+            $this->warningRedirect($isActive, ['email' => $data[1]], '/');
+        } else if ($isActive) {
+            $this->successRedirect(
+                'Usuario activado correctamente. Ahora puedes iniciar sesión', 
                 ['email' => $data[1]],
-                'user/index'
-            ); */
-            // Es importante detener la salida de cualquier contenido antes de header()
-            ob_clean();
-            header('Location: index.php');
-            exit;
+                '/'
+            );
         } else {
-            #$this->view->cambiarError('Error al activar el usuario. Por favor solicite un nuevo correo de activación.');
-            ob_clean();
-            header('Location: ' . $_ENV['DOMAIN'] . '/user');
-            exit;
+            $this->warningRedirect('Error al activar el usuario. Por favor solicite un nuevo correo de activación.');
         }
     }
 
-    public function login(): void {
+    function login(array $data): void {
         if (isset($_POST['email']) && isset($_POST['password'])) {
             $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
             $password = $_POST['password'];
 
-            #$usuario = UserModel::obtenerPorEmail($email);
-
+            $usuario = $this->model->obtenerPorEmail($email);
             if ($usuario && password_verify($password, $usuario['contraseña'])) {
                 SessionManager::set('user', $usuario['id']);
                 SessionManager::set('login', true);
                 
-                header('Location: index.php');
-            } /* else {
-                $errors[] = 'Invalid credentials';
-            } */
+                $this->successRedirect(
+                    'Inicio de sesión exitoso', 
+                    ['email' => $email],
+                    '/'
+                );
+            } else {
+                $this->warningRedirect('Credenciales inválidas');
+            }
         }
     }
 
-    public function logout(): void {
+    function logout(): void {
         SessionManager::destroy();
-        header('Location: /');
-        exit();
+        $this->successRedirect(
+            'Sesión cerrada correctamente', 
+            [],
+            '/'
+        );
     }
 
-    /* MÉTODOS PRIVADOS */
-    /* private function redirectWithError(string $mensaje, array $inputs = []): void{
-        $this->view->inputs = $inputs;
-        $this->view->cambiarError($mensaje, self::REDIRECT);
-    } */
+    function passwordSendEmail(array $data): void {
+        $this->validateUserData([
+            'email' => $data['email'],
+        ], false);
+
+        $datosUsuario = $this->model->obtenerPorEmail($data['email']);
+        if (empty($datosUsuario)) $this->warningRedirect('El correo electrónico no se encuentra registrado. Puedes crear una nueva cuenta con este correo electrónico');
+
+        $token = $this->model->almacenarToken($datosUsuario['id'], 'P', 1);
+        EmailService::sendEmailRecuperacion(
+            $datosUsuario['email'], 
+            $token
+        );
+
+        $this->successRedirect(
+            'Se ha enviado un correo electrónico con un enlace para restablecer tu contraseña',                 
+            [],
+            '/'
+        );
+    }
+
+    function passwordReset(array $data): void {
+        $this->validateUserData([
+            'email' => $data[1],
+        ], false);
+
+        if($this->model->isUsedToken($data[1], $data[0], 'P')) {
+            $this->warningRedirect('El token ya ha sido utilizado. Por favor, inicia sesión o solicita un nuevo correo de recuperación.');
+        }
+
+        $this->redirect('/user/password_form', '', '', ['email' => $data[1], 'token' => $data[0]]);
+    }
+
+    function passwordChange(array $data): void {
+        $this->validateUserData([
+            'email' => $data['email'],
+        ], false);
+
+        $this->validatePassword($data);
+
+        $passHash = $this->hashPassword($data['password']);
+        $isActive = $this->model->restablecerPassword($data['email'], $data['token'], $passHash);
+
+        if (gettype($isActive) === 'string') {
+            $this->warningRedirect($isActive, ['email' => $data[1]], '/');
+        } else if ($isActive) {
+            $this->successRedirect(
+                'Usuario activado correctamente. Ahora puedes iniciar sesión', 
+                ['email' => $data[1]],
+                '/'
+            );
+        } else {
+            $this->warningRedirect('Error de validación. No se ha podido restablecer la contraseña.');
+        }
+    }
 
     /** 
      * Valida los datos del usuario.
@@ -111,7 +185,7 @@ class UserController extends Controller {
             $required = ['email', 'username', 'password', 'confirm_password'];
             foreach ($required as $field) {
                 if (empty($data[$field])) {
-                    $this->view->cambiarError("El campo '$field' es requerido.", $data);
+                    $this->cambiarError("El campo '$field' es requerido.", $data);
                 }
             }
             $this->validateDuplicatedEmail($data);
@@ -120,14 +194,14 @@ class UserController extends Controller {
 
         if (isset($data['email']) && !empty($data['email'])) {
             if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-                $this->view->cambiarError('Formato de correo inválido, por favor ingresa un correo electrónico válido.', $data);
+                $this->cambiarError('Formato de correo inválido, por favor ingresa un correo electrónico válido.', $data);
             }
         }
     }
 
     private function validateDuplicatedEmail(array $data): void {
         if($this->model->obtenerPorEmail($data['email'])) {
-            $this->view->cambiarError("El correo electrónico ingresado ya ha sido registrado con otra cuenta.", $data);
+            $this->cambiarError("El correo electrónico ingresado ya ha sido registrado con otra cuenta.", $data);
         }
     }
 
@@ -173,26 +247,26 @@ class UserController extends Controller {
      **/
     private function validatePassword(array $data): void {
         if ($data['password'] !== $data['confirm_password']) {
-            $this->view->cambiarError("Las contraseñas no coinciden.", $data);
+            $this->cambiarError("Las contraseñas no coinciden.", $data);
         }
 
         if (strlen($data['password']) < self::PASSWORD_MIN_LENGTH) {
-            $this->view->cambiarError("La contraseña debe contener al menos " . self::PASSWORD_MIN_LENGTH . " carácteres.", $data);
+            $this->cambiarError("La contraseña debe contener al menos " . self::PASSWORD_MIN_LENGTH . " carácteres.", $data);
         }
         if (strlen($data['password']) > self::PASSWORD_MAX_LENGTH) {
-            $this->view->cambiarError("La contraseña debe contener máximo " . self::PASSWORD_MAX_LENGTH . " carácteres.", $data);
+            $this->cambiarError("La contraseña debe contener máximo " . self::PASSWORD_MAX_LENGTH . " carácteres.", $data);
         }
         
         if (!preg_match('/[A-Z]/', $data['password'])) {
-            $this->view->cambiarError('La contraseña debe contener al menos una mayúscula', $data);
+            $this->cambiarError('La contraseña debe contener al menos una mayúscula', $data);
         }
         
         if (!preg_match('/[a-z]/', $data['password'])) {
-            $this->view->cambiarError('La contraseña debe contener al menos una minúscula', $data);
+            $this->cambiarError('La contraseña debe contener al menos una minúscula', $data);
         }
         
         if (!preg_match('/\d/', $data['password'])) {
-            $this->view->cambiarError('La contraseña debe contener al menos un número', $data);
+            $this->cambiarError('La contraseña debe contener al menos un número', $data);
         }
     }
 }

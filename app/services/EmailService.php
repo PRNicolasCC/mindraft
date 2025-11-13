@@ -12,6 +12,8 @@ class EmailService {
     static function sendEmailRecuperacion(string $email, string $token): void {
 
         $subject = "Recuperación de Contraseña - ". htmlspecialchars($_ENV['APP_NAME']);
+
+        $enlace_recuperacion = htmlspecialchars($_ENV['DOMAIN'])."/user/passwordReset/{$token}/{$email}";
         $message = '
     <!-- Contenido principal -->
     <div class="content">
@@ -35,16 +37,7 @@ class EmailService {
             Para crear una nueva contraseña y recuperar el acceso a tu cuenta, haz clic en el siguiente botón:
         </p>
 
-        <form action="' . htmlspecialchars($_ENV['DOMAIN']) . '" method="post" style="display: inline;">
-            <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
-            <input type="hidden" name="token" value="' . htmlspecialchars($token) . '">
-            
-            <input type="hidden" name="email" value="' . htmlspecialchars($email) . '">
-            
-            <button type="submit" class="reset-button">
-                🔑 Cambiar mi contraseña
-            </button>
-        </form>
+        <a href="' . $enlace_recuperacion . '" class="activation-button">✅ Cambiar mi contraseña</a>
 
         </div>
 
@@ -110,16 +103,6 @@ class EmailService {
             <p class="activation-text">
                 Para completar tu registro y comenzar a usar ' . htmlspecialchars($_ENV['APP_NAME']) . ', haz clic en el siguiente botón:
             </p>
-
-            <!--<form action="' . htmlspecialchars($_ENV['DOMAIN']) . '" method="post" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
-                <input type="hidden" name="token" value="' . htmlspecialchars($token) . '">
-                
-                <input type="hidden" name="email" value="' . htmlspecialchars($email) . '">
-                <button type="submit" name="activate_user" class="activation-button">
-                    ✅ Activar mi cuenta
-                </button>
-            </form> -->
 
             <a href="' . $enlace_activacion . '" class="activation-button">✅ Activar mi cuenta</a>
 

@@ -22,6 +22,8 @@ class PostManager {
             $userActions = [
                 'create_user' => ['user', 'register'],
                 'login' => ['user', 'login'],
+                'password_reset' => ['user', 'passwordSendEmail'],
+                'password_change' => ['user', 'passwordChange'],
             ];
             $postActions = array_merge($userActions);
 

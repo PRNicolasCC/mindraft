@@ -12,6 +12,8 @@
     <!-- FontAwesome -->
     <script src="https://kit.fontawesome.com/bb971a4b30.js" crossorigin="anonymous"></script>
 
+    <base href="<?php echo htmlspecialchars($_ENV['DOMAIN'] . '/'); ?>">
+
     <!-- CSS -->
     <link rel="stylesheet" href="public/css/style.css">
 </head>

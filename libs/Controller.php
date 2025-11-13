@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 abstract class Controller{
-    public $view;
-    public $model;
+    protected $view;
+    protected $model;
+    private array $getActions;
 
     /**
      * Constructor de la clase Controller.
@@ -16,6 +17,14 @@ abstract class Controller{
     function __construct(string $model = ''){
         $this->view = new View();
         $this->loadModel($model);
+    }
+
+    protected function setGetActions(array $actions): void {
+        $this->getActions = $actions;
+    }
+
+    function getActions(): array {
+        return $this->getActions;
     }
 
     /**
@@ -41,12 +50,49 @@ abstract class Controller{
      * @param string $name El nombre del controlador en minúscula
      * @return array
     */
-    public static function getInfoController(string $name): array{
+    static function getInfoController(string $name): array{
         $name = ucfirst($name);
         return [
             'file' => 'app/controllers/' . $name . 'Controller.php',
             'controller' => $name . 'Controller',
         ];
+    }
+
+    function successRedirect(string $mensaje, array $inputs = [], string $redirect = ''): void{
+        $this->redirect($redirect, $mensaje, 'success', $inputs);
+    }
+
+    function warningRedirect(string $mensaje, array $inputs = [], string $redirect = ''): void{
+        $this->redirect($redirect, $mensaje, 'warning', $inputs);
+    }
+
+    function infoRedirect(string $mensaje, array $inputs = [], string $redirect = ''): void{
+        $this->redirect($redirect, $mensaje, 'info', $inputs);
+    }
+
+    /**
+     * Cambia el error de validación general de la aplicación 
+     */
+    function cambiarError(string $mensaje, array $inputs = [], string $redirect = ''): void {
+        $this->redirect($redirect, $mensaje, 'error', $inputs);
+    }
+
+    /**
+     * Redirecciona la URL a una vista específica
+     * Si no se pasa la url, entonces redirecciona de donde venía (referer) 
+     * o en su defecto se redirige al inicio
+     * 
+     * @param string $url La URL a la que se redirigirá
+     * @param string $description La descripción del mensaje
+     * @param string $type El tipo del mensaje
+     * @param array $inputs Los inputs del formulario
+     * @return void
+     */
+    protected function redirect(string $route = '', string $description = '', string $type = '', array $inputs = []): void {
+        $referer = $route !== '' ? ($_ENV['DOMAIN'] . $route) : ($_SERVER['HTTP_REFERER'] ?? $_ENV['DOMAIN']);
+        $this->view->setMessageAndInputs($description, $type, $inputs);
+        header('Location: ' . $referer);
+        exit;
     }
 }
 

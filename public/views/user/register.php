@@ -6,8 +6,8 @@ $propsAuth = [
     'sendButton' => 'Registrarse',
 ];
 
-$previousEmail = isset($this->inputs['email']) ? $this->inputs['email'] : '';
-$previousUsername = isset($this->inputs['username']) ? $this->inputs['username'] : '';
+$previousEmail = SessionManager::has('redirectInputs') ? SessionManager::get('redirectInputs')['email'] : '';
+$previousUsername = SessionManager::has('redirectInputs') ? SessionManager::get('redirectInputs')['username'] : '';
 
 $childrenAuth = '
             <div class="form-floating">
@@ -100,7 +100,7 @@ $childrenAuth = '
             </div> -->
 
             <!-- Input para enviar como remplazo del boton de envío al index.
-             Esto sucede porque new FormData(form) solo recopila los datos de 
+             Esto sucede porque new FormData(form) en js solo recopila los datos de 
              los campos (input, select, textarea), pero no incluye el botón de submit que inició el evento. -->
             <input type="hidden" name="create_user" value="1" required>
 
