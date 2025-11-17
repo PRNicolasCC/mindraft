@@ -14,3 +14,6 @@ The goal of the project is to provide a clean and intuitive interface for managi
 
 ## 📌 Status
 🧱 The project is currently in early development. Core authentication features are completed, and the next steps involve implementing note and notebook management.
+
+## 🌐 Other languages
+- 🇪🇸 Español: README.es.md
