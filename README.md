@@ -1,6 +1,6 @@
-# Notes App
+# Mindraft
 
-Notes App is a simple and modern note-taking application that allows users to create, edit, and organize notes inside customizable notebooks.  
+Mindraft is a simple and modern note-taking application that allows users to create, edit, and organize notes inside customizable notebooks.  
 The goal of the project is to provide a clean and intuitive interface for managing personal information, ideas, study notes, and more.
 
 ## 🚀 Current Features
