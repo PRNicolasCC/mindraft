@@ -6,6 +6,8 @@ $propsAuth = [
     'sendButton' => 'Enviar enlace de recuperación',
 ];
 
+$previousEmail = SessionManager::has('redirectInputs') ? SessionManager::get('redirectInputs')['email'] : '';
+
 $childrenAuth = '
             <div class="form-floating">
                 <input
@@ -17,6 +19,7 @@ $childrenAuth = '
                     required
                     autofocus
                     maxlength="75"
+                    value="'.htmlspecialchars($previousEmail) .'"
                 />
                 <label for="email" id="labelEmail" class="fs-5">Email registrado</label>
             </div>
@@ -30,18 +33,17 @@ $childrenAuth = '
 
 $aditionalAuth = '
         <div class="navigation-links">
-            <a href="index.php" class="back-link">
+            <a href="auth" class="back-link">
                 <i class="fa-solid fa-arrow-left"></i>
                 Volver al inicio de sesión
             </a>
             <div class="divider">•</div>
-            <a href="/user" class="register-link">
+            <a href="user" class="register-link">
                 ¿No tienes cuenta? Regístrate
             </a>
         </div>';
 
-$scriptsAuth = '<script src="public/js/user/index.js"></script>
-    <script src="public/js/user/password.js"></script>';
+$scriptsAuth = '<script src="public/js/password/index.js"></script>';
 
 require_once 'public/views/form.php';
 ?>

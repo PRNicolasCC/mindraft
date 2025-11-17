@@ -11,14 +11,8 @@
      📌 Variables globales (modo claro/oscuro posible)
      ================================ */
   :root {
-    /* Colores */
-    /* --bs-primary: #1e90ff;
-    --color-secondary: #ff6b6b;
-    --color-background: #ffffff;
-    --color-text: #222222; */
-
-    --bs-primary: #FBB11E;         /* índigo */
-    --bs-secondary: #FAEE7D;       /* slate */
+    --bs-primary: #FBB11E;
+    --bs-secondary: #FAEE7D;
     --bs-third: #FADF7D;
     --bs-fourth: #FAB669;
     --bs-fifth: #E2F723;
@@ -302,30 +296,27 @@ body::before {
   backdrop-filter: blur(10px);
   border: 1px solid;
   animation: slideIn 0.3s ease-out;
+  color: var(--text-muted);
 }
 
 .message.error {
   background: rgba(255, 71, 87, 0.15);
   border-color: rgba(255, 71, 87, 0.3);
-  color: #ffebee;
 }
 
 .message.success {
   background: rgba(46, 213, 115, 0.15);
   border-color: rgba(46, 213, 115, 0.3);
-  color: #e8f5e8;
 }
 
 .message.warning {
   background: rgba(255, 165, 2, 0.15);
   border-color: rgba(255, 165, 2, 0.3);
-  color: #fff3e0;
 }
 
 .message.info {
   background: rgba(55, 66, 250, 0.15);
   border-color: rgba(55, 66, 250, 0.3);
-  color: #e3f2fd;
 }
 
 .message i {

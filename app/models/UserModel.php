@@ -2,17 +2,14 @@
 declare(strict_types=1); # volvemos a definir el strict types ya que únicamente se aplica al archivo donde está definida.
 
 class UserModel extends Model {
-    private string $table = 'usuarios';
-    private string $tableTokens = 'tokens';
-    private DateTime $dateTime;
+    protected string $table = 'usuarios';
+    protected string $tableTokens = 'tokens';
 
     /** 
      * Constructor de la clase UserModel.
      **/
     function __construct() {
         parent::__construct();
-        $this->dateTime = new DateTime('now', new DateTimeZone('America/Bogota')); // Se debe tener la misma zona horaria local para no tener discrepancias en la BD
-        //$this->dateTime = new DateTime('now', new DateTimeZone('UTC'));
     }
 
     function crear(string $email, string $password_hash, string $nombre): ?array {
@@ -61,40 +58,18 @@ class UserModel extends Model {
         return false;
     }
 
-    function restablecerPassword(string $email, string $token, string $password): bool | string {
-        if ($this->isUsedToken($email, $token, 'P')) return 'El token de recuperación ya ha sido utilizado.';
-        if($this->isExpiredToken($email, $token, 'P')) return 'El token de recuperación ha expirado. Han pasado 2 horas desde que se solicitó el correo de recuperación. Por favor, solicita un nuevo correo de recuperación.';
-
-        $sql = "UPDATE {$this->table} a
-                JOIN {$this->tableTokens} b ON a.id = b.usuario_id 
-                SET a.contraseña = :new_password, b.used = :used, b.used_at = :used_at, b.ip_address = :ip_address
-                WHERE a.email = :email AND b.token = :token AND b.tipo = :tipo
-                AND a.is_active = :is_active";
-
-        $actualizacion = $this->db->ejecutar($sql, [
-            'email' => $email, 
-            'token' => $token,
-            'new_password' => $password,
-            'used' => 1,
-            'used_at' => $this->dateTime->format('Y-m-d H:i:s'),
-            'ip_address' => $_SERVER['REMOTE_ADDR'],
-            'tipo' => 'P',
-            'is_active' => 1,
-        ]);
-        if ($actualizacion > 0) {
-            return true;
-        }
-        return false;
-    }
-    
-
     /** 
      * Obtiene el usuario por su email.
      * @param string $email El email del usuario a buscar.
      **/
     function obtenerPorEmail(string $email): ?array {
-        $sql = "SELECT id, email FROM {$this->table} WHERE email = :email";
+        $sql = "SELECT id, email, nombre, contraseña FROM {$this->table} WHERE email = :email";
         return $this->db->fetchOne($sql, ['email' => $email]);
+    }
+
+    function verificarUsuarioActivo(string $email): bool {
+        $sql = "SELECT id, email FROM {$this->table} WHERE email = :email AND is_active = :is_active";
+        return !empty($this->db->fetchOne($sql, ['email' => $email, 'is_active' => 1]));
     }
 
     /**
@@ -144,7 +119,7 @@ class UserModel extends Model {
         return !empty($this->db->fetchOne($sql, $parametros));
     }
 
-    private function isExpiredToken(string $email, string $token, string $tipo = 'A'): bool {
+    protected function isExpiredToken(string $email, string $token, string $tipo = 'A'): bool {
         $sql = "SELECT * FROM {$this->table} a
                 JOIN {$this->tableTokens} b ON a.id = b.usuario_id 
                 WHERE b.token = :token AND a.email = :email AND b.tipo = :tipo
@@ -156,6 +131,32 @@ class UserModel extends Model {
             'expires_at' => $this->dateTime->format('Y-m-d H:i:s')
         ];
         return !empty($this->db->fetchOne($sql, $parametros));
+    }
+
+    function restablecerPassword(string $email, string $token, string $password): bool | string {
+        if ($this->isUsedToken($email, $token, 'P')) return 'El token de recuperación ya ha sido utilizado.';
+        if($this->isExpiredToken($email, $token, 'P')) return 'El token de recuperación ha expirado. Han pasado 2 horas desde que se solicitó el correo de recuperación. Por favor, solicita un nuevo correo de recuperación.';
+
+        $sql = "UPDATE {$this->table} a
+                JOIN {$this->tableTokens} b ON a.id = b.usuario_id 
+                SET a.contraseña = :new_password, b.used = :used, b.used_at = :used_at, b.ip_address = :ip_address
+                WHERE a.email = :email AND b.token = :token AND b.tipo = :tipo
+                AND a.is_active = :is_active";
+
+        $actualizacion = $this->db->ejecutar($sql, [
+            'email' => $email, 
+            'token' => $token,
+            'new_password' => $password,
+            'used' => 1,
+            'used_at' => $this->dateTime->format('Y-m-d H:i:s'),
+            'ip_address' => $_SERVER['REMOTE_ADDR'],
+            'tipo' => 'P',
+            'is_active' => 1,
+        ]);
+        if ($actualizacion > 0) {
+            return true;
+        }
+        return false;
     }
     
 }

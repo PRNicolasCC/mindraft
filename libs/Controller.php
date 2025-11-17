@@ -2,9 +2,10 @@
 declare(strict_types=1);
 
 abstract class Controller{
-    protected $view;
-    protected $model;
+    protected View $view;
+    protected Model $model;
     private array $getActions;
+    private array $tokenMethods;
 
     /**
      * Constructor de la clase Controller.
@@ -17,14 +18,8 @@ abstract class Controller{
     function __construct(string $model = ''){
         $this->view = new View();
         $this->loadModel($model);
-    }
-
-    protected function setGetActions(array $actions): void {
-        $this->getActions = $actions;
-    }
-
-    function getActions(): array {
-        return $this->getActions;
+        $this->setGetActions([]);
+        $this->setTokenMethods([]);
     }
 
     /**
@@ -42,6 +37,22 @@ abstract class Controller{
             $modelName = $model.'Model';
             $this->model = new $modelName();
         }
+    }
+
+    protected function setGetActions(array $actions): void {
+        $this->getActions = $actions;
+    }
+
+    function getActions(): array {
+        return $this->getActions;
+    }
+
+    protected function setTokenMethods(array $methods): void {
+        $this->tokenMethods = $methods;
+    }
+
+    function getTokenMethods(): array {
+        return $this->tokenMethods;
     }
 
     /**
@@ -94,6 +105,17 @@ abstract class Controller{
         header('Location: ' . $referer);
         exit;
     }
-}
 
+    protected function isAuth(): void {
+        if (!SessionManager::isAuthenticated()) {
+            $this->redirect('/auth');
+        }
+    }
+
+    protected function isNotAuth(): void {
+        if (SessionManager::isAuthenticated()) {
+            $this->redirect('/');
+        }
+    }
+}
 ?>

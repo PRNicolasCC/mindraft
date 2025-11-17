@@ -8,12 +8,11 @@ use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 
 class EmailService {
-    /* MÉTODOS PÚBLICOS */
     static function sendEmailRecuperacion(string $email, string $token): void {
 
         $subject = "Recuperación de Contraseña - ". htmlspecialchars($_ENV['APP_NAME']);
 
-        $enlace_recuperacion = htmlspecialchars($_ENV['DOMAIN'])."/user/passwordReset/{$token}/{$email}";
+        $enlace_recuperacion = htmlspecialchars($_ENV['DOMAIN'])."/password/reset/{$token}/{$email}";
         $message = '
     <!-- Contenido principal -->
     <div class="content">

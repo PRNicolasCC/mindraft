@@ -2,7 +2,7 @@
 
 $propsAuth = [
     'title' => 'Restablecer contraseña',
-    'subtitle' => 'Escribe la nueva contraseña para la cuenta registrada con <b>' . htmlspecialchars(SessionManager::get('redirectInputs')['email']) . '</b>',
+    'subtitle' => 'Escribe la nueva contraseña para la cuenta registrada con ' . htmlspecialchars(SessionManager::get('redirectInputs')['email']) . '',
     'sendButton' => 'Restablecer contraseña',
 ];
 
@@ -66,8 +66,7 @@ $childrenAuth = '
     
 SessionManager::remove('redirectInputs');
 
-$scriptsAuth = '<script src="public/js/user/index.js"></script>
-    <script src="public/js/user/password_form.js"></script>';
+$scriptsAuth = '<script src="public/js/password/form_reset.js"></script>';
 
 require_once 'public/views/form.php';
 ?>

@@ -4,41 +4,22 @@ declare(strict_types=1);
 require_once 'app/services/EmailService.php';
 
 class UserController extends Controller {
-    private const PASSWORD_MIN_LENGTH = 8;
-    private const PASSWORD_MAX_LENGTH = 30;
-    private array $tokenMethods;
+    protected const PASSWORD_MIN_LENGTH = 8;
+    protected const PASSWORD_MAX_LENGTH = 30;
 
     function __construct(){
         parent::__construct('user');
         $this->setGetActions([
-            'password_form',
-            'password',
             'activate',
-            'passwordReset',
         ]);
-        $this->tokenMethods = [
+        $this->setTokenMethods([
             'activate',
-            'passwordReset',
-        ];
-    }
-
-    function getTokenMethods(): array {
-        return $this->tokenMethods;
+        ]);
     }
 
     function render(): void{
-        $this->view->render('user/register');
-    }
-
-    function password(): void {
-        $this->view->render('user/password');
-    }
-
-    function password_form(): void {
-        if (!SessionManager::has('redirectInputs') || !isset(SessionManager::get('redirectInputs')['email']) || !isset(SessionManager::get('redirectInputs')['token'])) {
-            $this->redirect('/');
-        }
-        $this->view->render('user/password_form');
+        $this->isNotAuth();
+        $this->view->render('user/index');
     }
 
     function register(array $data): void{
@@ -88,99 +69,13 @@ class UserController extends Controller {
         }
     }
 
-    function login(array $data): void {
-        if (isset($_POST['email']) && isset($_POST['password'])) {
-            $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
-            $password = $_POST['password'];
-
-            $usuario = $this->model->obtenerPorEmail($email);
-            if ($usuario && password_verify($password, $usuario['contraseña'])) {
-                SessionManager::set('user', $usuario['id']);
-                SessionManager::set('login', true);
-                
-                $this->successRedirect(
-                    'Inicio de sesión exitoso', 
-                    ['email' => $email],
-                    '/'
-                );
-            } else {
-                $this->warningRedirect('Credenciales inválidas');
-            }
-        }
-    }
-
-    function logout(): void {
-        SessionManager::destroy();
-        $this->successRedirect(
-            'Sesión cerrada correctamente', 
-            [],
-            '/'
-        );
-    }
-
-    function passwordSendEmail(array $data): void {
-        $this->validateUserData([
-            'email' => $data['email'],
-        ], false);
-
-        $datosUsuario = $this->model->obtenerPorEmail($data['email']);
-        if (empty($datosUsuario)) $this->warningRedirect('El correo electrónico no se encuentra registrado. Puedes crear una nueva cuenta con este correo electrónico');
-
-        $token = $this->model->almacenarToken($datosUsuario['id'], 'P', 1);
-        EmailService::sendEmailRecuperacion(
-            $datosUsuario['email'], 
-            $token
-        );
-
-        $this->successRedirect(
-            'Se ha enviado un correo electrónico con un enlace para restablecer tu contraseña',                 
-            [],
-            '/'
-        );
-    }
-
-    function passwordReset(array $data): void {
-        $this->validateUserData([
-            'email' => $data[1],
-        ], false);
-
-        if($this->model->isUsedToken($data[1], $data[0], 'P')) {
-            $this->warningRedirect('El token ya ha sido utilizado. Por favor, inicia sesión o solicita un nuevo correo de recuperación.');
-        }
-
-        $this->redirect('/user/password_form', '', '', ['email' => $data[1], 'token' => $data[0]]);
-    }
-
-    function passwordChange(array $data): void {
-        $this->validateUserData([
-            'email' => $data['email'],
-        ], false);
-
-        $this->validatePassword($data);
-
-        $passHash = $this->hashPassword($data['password']);
-        $isActive = $this->model->restablecerPassword($data['email'], $data['token'], $passHash);
-
-        if (gettype($isActive) === 'string') {
-            $this->warningRedirect($isActive, ['email' => $data[1]], '/');
-        } else if ($isActive) {
-            $this->successRedirect(
-                'Usuario activado correctamente. Ahora puedes iniciar sesión', 
-                ['email' => $data[1]],
-                '/'
-            );
-        } else {
-            $this->warningRedirect('Error de validación. No se ha podido restablecer la contraseña.');
-        }
-    }
-
     /** 
      * Valida los datos del usuario.
      * @param array $data Los datos del usuario a validar.
      * @param bool $isCreate Indica si es una operación de creación (true) o actualización (false).
      * @return void
      **/
-    private function validateUserData(array $data, bool $isCreate = true): void {
+    protected function validateUserData(array $data, bool $isCreate = true): void {
         if ($isCreate) {
             $required = ['email', 'username', 'password', 'confirm_password'];
             foreach ($required as $field) {
@@ -199,53 +94,17 @@ class UserController extends Controller {
         }
     }
 
-    private function validateDuplicatedEmail(array $data): void {
+    protected function validateDuplicatedEmail(array $data): void {
         if($this->model->obtenerPorEmail($data['email'])) {
             $this->cambiarError("El correo electrónico ingresado ya ha sido registrado con otra cuenta.", $data);
         }
     }
 
-    /**
-     * Hashea una contraseña usando el algoritmo Argon2ID con opciones seguras.
-     * @param string $password La contraseña en texto plano a hashear.
-     * @return string|false El hash de la contraseña o false en caso de error.
-     */
-    private function hashPassword(string $password): string|false {
-        // Definimos las opciones de costo recomendadas para Argon2ID.
-        // PHP utiliza valores por defecto razonables, pero definirlos es explícito.
-        $options = [
-            // t_cost (Tiempo): número de iteraciones. El valor por defecto es 4.
-            'time_cost' => 4, 
-            
-            // memory_cost (Memoria): kilobytes de memoria a utilizar. El valor por defecto es 65536 (64 MB).
-            'memory_cost' => 65536, 
-            
-            // threads (Paralelismo): número de hilos. El valor por defecto es 1.
-            'threads' => 1 
-        ];
-
-        // Utilizamos PASSWORD_ARGON2ID, que es la opción más segura actualmente.
-        // password_hash maneja el 'salting' (adición de sal) automáticamente.
-        $hash = password_hash($password, PASSWORD_ARGON2ID, $options);       
-        return $hash;
-    }
-
-    // ----------------------------------------------------
-    // Nota: La verificación se hace con password_verify()
-    // ----------------------------------------------------
-    /* $isVerified = password_verify($plainPassword, $hashedPassword);
-
-    if ($isVerified) {
-        echo "\nVerificación: ¡Contraseña correcta!";
-    } else {
-        echo "\nVerificación: Contraseña incorrecta.";
-    } */
-
     /** 
      * Valida los datos del usuario.
      * @param string $password La contraseña a validar.
      **/
-    private function validatePassword(array $data): void {
+    protected function validatePassword(array $data): void {
         if ($data['password'] !== $data['confirm_password']) {
             $this->cambiarError("Las contraseñas no coinciden.", $data);
         }
@@ -269,6 +128,39 @@ class UserController extends Controller {
             $this->cambiarError('La contraseña debe contener al menos un número', $data);
         }
     }
-}
 
+    protected function validateUserActive(array $data): void {
+        if (!$this->model->verificarUsuarioActivo($data['email'])) {
+            $this->warningRedirect(
+                "El correo electrónico ingresado no ha sido activado, activalo desde el correo electrónico enviado para poder restablecer tu contraseña.", 
+                ['email' => $data['email']],
+            );
+        }
+    }
+
+    /**
+     * Hashea una contraseña usando el algoritmo Argon2ID con opciones seguras.
+     * @param string $password La contraseña en texto plano a hashear.
+     * @return string|false El hash de la contraseña o false en caso de error.
+     */
+    protected function hashPassword(string $password): string|false {
+        // Definimos las opciones de costo recomendadas para Argon2ID.
+        // PHP utiliza valores por defecto razonables, pero definirlos es explícito.
+        $options = [
+            // t_cost (Tiempo): número de iteraciones. El valor por defecto es 4.
+            'time_cost' => 4, 
+            
+            // memory_cost (Memoria): kilobytes de memoria a utilizar. El valor por defecto es 65536 (64 MB).
+            'memory_cost' => 65536, 
+            
+            // threads (Paralelismo): número de hilos. El valor por defecto es 1.
+            'threads' => 1 
+        ];
+
+        // Utilizamos PASSWORD_ARGON2ID, que es la opción más segura actualmente.
+        // password_hash maneja el 'salting' (adición de sal) automáticamente.
+        $hash = password_hash($password, PASSWORD_ARGON2ID, $options);       
+        return $hash;
+    }
+}
 ?>

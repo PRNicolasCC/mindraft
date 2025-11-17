@@ -18,11 +18,3 @@ document.getElementById('sendForm').addEventListener('submit', function(e) {
     // Show loading state
     showLoadingState(button, btnText, spinner)
 });
-
-// Auto-focus management
-/* window.addEventListener('load', function() {
-    const emailField = document.getElementById('email');
-    if (emailField && !emailField.value) {
-        setTimeout(() => emailField.focus(), 100);
-    }
-}); */

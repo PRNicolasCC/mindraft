@@ -21,11 +21,16 @@ class PostManager {
         if($this->validarPOST()){
             $userActions = [
                 'create_user' => ['user', 'register'],
-                'login' => ['user', 'login'],
-                'password_reset' => ['user', 'passwordSendEmail'],
-                'password_change' => ['user', 'passwordChange'],
             ];
-            $postActions = array_merge($userActions);
+            $authActions = [
+                'login' => ['auth', 'login'],
+                'logout' => ['auth', 'logout'],
+            ];
+            $passwordActions = [
+                'password_reset' => ['password', 'sendEmail'],
+                'password_change' => ['password', 'change'],
+            ];
+            $postActions = array_merge($userActions, $authActions, $passwordActions);
 
             foreach ($postActions as $postKey => $contr) {
                 if (isset($_POST[$postKey])) {
@@ -53,7 +58,10 @@ class PostManager {
             return false;
         }
 
-        // 2. Validar Content-Type para formularios exclusivas de la propia aplicación y no desde APIs
+        // 2. Regenerar el token csrf despues de validar el anterior correctamente
+        SessionManager::set('csrf_token', bin2hex(random_bytes(32)));
+
+        // 3. Validar Content-Type para formularios exclusivas de la propia aplicación y no desde APIs
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
         
         if(!empty($_POST) || !empty($_FILES)){
@@ -66,10 +74,10 @@ class PostManager {
             }
         }
 
-        //3. Sanitizar datos POST
+        // 4. Sanitizar datos POST
         $this->sanitizarDatosPOST();
 
-        // 4. Validar que la petición viene del mismo sitio
+        // 5. Validar que la petición viene del mismo sitio
         if(!$this->validarReferer()){
             $this->errorMessage = 'La solicitud no proviene de una fuente válida.';
             return false;

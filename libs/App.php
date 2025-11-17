@@ -16,14 +16,15 @@ class App{
             $request = new PostManager();
             if(!empty($request->errorMessage)) $this->controller = new ErroresController($request->errorMessage);
         } else {
+            if (!SessionManager::has('csrf_token')) SessionManager::set('csrf_token', bin2hex(random_bytes(32)));
+
             $url = isset($_GET['url']) ? $_GET['url']: '/';
             $url = rtrim($url, '/');
             $url = explode('/', $url);
 
             // cuando se ingresa sin definir controlador
             if(empty($url[0])){
-                $archivoController = 'app/controllers/MainController.php';
-                require_once $archivoController;
+                require_once 'app/controllers/MainController.php';
                 $this->controller = new MainController();
                 $this->controller->render();
                 return;
@@ -36,9 +37,6 @@ class App{
             if(file_exists($archivoController)){
                 require_once $archivoController;
 
-                if (!SessionManager::has('csrf_token')) SessionManager::set('csrf_token', bin2hex(random_bytes(32)));
-
-                #$urlController = $name . 'Controller';
                 $controller = $infoController['controller'];
                 // inicializar controlador
                 $this->controller = new $controller;
@@ -61,7 +59,7 @@ class App{
                         
                         // Comprueba si el referer no está presente O si el host del referer NO es el host de la aplicación
                         if (empty($referer) || !strpos($referer, $app_host) || !method_exists($this->controller, $url[1])) {
-                            $this->controller = new ErroresController("Error 404: La página solicitada no existe.");
+                            $this->controller = new ErroresController();
                             return;
                         }
                     }
@@ -74,7 +72,7 @@ class App{
                         // Si el método requiere de un token y no tiene al menos 2 parámetros extras (token y email),
                         // significa que la URL no está completa. Se muestra error 404.
                         if($nparam !== 4) {
-                            $this->controller = new ErroresController("Error 404: La página solicitada no existe.");
+                            $this->controller = new ErroresController();
                             return;
                         }
                     }
@@ -93,7 +91,7 @@ class App{
                     $this->controller->render();
                 }
             }else{
-                $this->controller = new ErroresController("Error 404: La página solicitada no existe.");
+                $this->controller = new ErroresController();
             }
         }
     }
