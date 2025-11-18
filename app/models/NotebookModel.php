@@ -1,10 +1,70 @@
 <?php
 
 class NotebookModel extends Model {
-    protected $table = 'notebooks';
+    protected $table = 'cuadernos';
 
-    public function crear($email){
-        
+    /** 
+     * Constructor de la clase NotebookModel.
+     **/
+    function __construct() {
+        parent::__construct();
+    }
+
+    function crear(string $nombre, string $descripcion, string $color, int $userId): ?array{
+        $sql = "INSERT INTO {$this->table} (nombre, descripcion, color, usuario_id) VALUES (:nombre, :descripcion, :color, :usuario_id)";
+        $parametros = [
+            'nombre' => $nombre,
+            'descripcion' => $descripcion,
+            'color' => $color,
+            'usuario_id' => $userId
+        ];
+        $insercion = $this->db->ejecutar($sql, $parametros);
+        if ($insercion > 0) {
+            $nuevoId = $this->db->ultimoIdInsertado();
+            return [
+                'id' => $nuevoId,
+                'nombre' => $nombre,
+                'descripcion' => $descripcion,
+                'color' => $color,
+                'usuario_id' => $userId
+            ];
+        }
+        return null;
+    }
+
+    function obtenerPorUsuario(int $userId): ?array{
+        $sql = "SELECT * FROM {$this->table} WHERE usuario_id = :usuario_id";
+        return $this->db->fetchAll($sql, ['usuario_id' => $userId]);
+    }
+
+    function obtenerPorId(int $id): ?array{
+        $sql = "SELECT * FROM {$this->table} WHERE id = :id";
+        return $this->db->fetchOne($sql, ['id' => $id]);
+    }
+
+    function actualizar(int $id, string $nombre, string $descripcion, string $color, string $estadoId): bool{
+        $estadosPermitidos = ['A', 'I'];
+        if (!in_array($estadoId, $estadosPermitidos)) {
+            throw new Exception("Estado no válido. Estados permitidos: " . implode(', ', $estadosPermitidos));
+        }
+
+        $sql = "UPDATE {$this->table} SET nombre = :nombre, descripcion = :descripcion, color = :color, estado_id = :estado_id WHERE id = :id";
+        $parametros = [
+            'id' => $id,
+            'nombre' => $nombre,
+            'descripcion' => $descripcion,
+            'color' => $color,
+            'estado_id' => $estadoId
+        ];
+        return $this->db->ejecutar($sql, $parametros) > 0;
+    }
+
+    function eliminar(int $id): bool{
+        $sql = "DELETE FROM {$this->table} WHERE id = :id";
+        $parametros = [
+            'id' => $id
+        ];
+        return $this->db->ejecutar($sql, $parametros) > 0;
     }
 }
 ?>

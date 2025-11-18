@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 class NotebookController extends Controller {
     function __construct(){
@@ -6,34 +7,26 @@ class NotebookController extends Controller {
     }
 
     function render(): void{
-        $this->redirect('/');
+        $this->isAuth();
+        $notebooks = $this->model->obtenerPorUsuario(SessionManager::get('user')['id']);
+        $this->view->render('notebook/index', $notebooks);
     }
 
     function store(array $data): void{
-        $datosUsuario = $this->model->crear($data['email'], $passHash, $data['username']);
-
-        if (!empty($datosUsuario)) {
-            EmailService::sendWelcomeEmail(
-                $datosUsuario['email'], 
-                $datosUsuario['token']
-            );
-
+        $this->isAuth();
+        $notebook = $this->model->crear($data['nombre'], $data['descripcion'], $data['color'], SessionManager::get('user')['id']);
+        if (!empty($notebook)) {
             $this->successRedirect(
-                'Usuario registrado correctamente. Se ha enviado un correo electrónico con un enlace para activar tu cuenta',                 
+                'Cuaderno creado correctamente',                 
                 [],
                 '/'
             );
         } else {
-            $this->cambiarError('Error al registrar el usuario. Por favor contacte al administrador');
+            $this->cambiarError('Error al crear el cuaderno. Por favor contacte al administrador');
         }
     }
 
-    function show(string $id): void{
-        $this->isAuth();
-        $this->view->render('notebook/index');
-    }
-
-    function edit(string $id): void{
+    /* function edit(string $id): void{
         $this->isAuth();
         $this->view->render('notebook/index');
     }
@@ -46,7 +39,7 @@ class NotebookController extends Controller {
     function destroy(string $id): void{
         $this->isAuth();
         $this->view->render('notebook/index');
-    }
+    } */
 }
 
 ?>

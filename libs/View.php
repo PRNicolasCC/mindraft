@@ -13,7 +13,8 @@ class View{
         ];
     }
 
-    function render(string $file): void{
+    function render(string $file, ?array $data = null): void{
+        #extract($data);
         require 'public/views/' . $file . '.php';
     }
 

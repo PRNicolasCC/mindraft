@@ -30,7 +30,15 @@ class PostManager {
                 'password_reset' => ['password', 'sendEmail'],
                 'password_change' => ['password', 'change'],
             ];
-            $postActions = array_merge($userActions, $authActions, $passwordActions);
+            $notebookActions = [
+                'create_notebook' => ['notebook', 'store'],
+            ];
+            $postActions = array_merge(
+                $userActions, 
+                $authActions, 
+                $passwordActions, 
+                $notebookActions
+            );
 
             foreach ($postActions as $postKey => $contr) {
                 if (isset($_POST[$postKey])) {

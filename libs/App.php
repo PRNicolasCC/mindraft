@@ -24,8 +24,8 @@ class App{
 
             // cuando se ingresa sin definir controlador
             if(empty($url[0])){
-                require_once 'app/controllers/MainController.php';
-                $this->controller = new MainController();
+                require_once 'app/controllers/NotebookController.php';
+                $this->controller = new NotebookController();
                 $this->controller->render();
                 return;
             }

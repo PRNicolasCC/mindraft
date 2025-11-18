@@ -1,4 +1,4 @@
-// Espera a que el DOM esté completamente cargado para ejecutar el script
+/* // Espera a que el DOM esté completamente cargado para ejecutar el script
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. ESTADO DE LA APLICACIÓN ---
@@ -304,4 +304,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 7. RENDERIZADO INICIAL ---
     // Llama a render() una vez al cargar la página
     render();
-});
+}); */
