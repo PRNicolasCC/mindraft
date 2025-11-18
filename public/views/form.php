@@ -10,7 +10,7 @@
                     <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
                     ' . $childrenAuth;
                     
-                    $children .= isset($propsAuth['sendButton']) && $propsAuth['sendButton'] !== '' ? '<button type="submit" class="btn btn-register" id="sendButton">
+                    $children .= isset($propsAuth['sendButton']) && $propsAuth['sendButton'] !== '' ? '<button type="submit" class="btn" id="sendButton">
                         <span class="btn-text">'.htmlspecialchars($propsAuth['sendButton']).'</span>
                         <div class="spinner" id="sendSpinner"></div>
                     </button>' : '';

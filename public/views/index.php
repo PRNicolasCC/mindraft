@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
     <!-- FontAwesome -->
     <script src="https://kit.fontawesome.com/bb971a4b30.js" crossorigin="anonymous"></script>
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
     <base href="<?php echo htmlspecialchars($_ENV['DOMAIN'] . '/'); ?>">
 

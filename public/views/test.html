@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Cuadernos</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          background-color: #f8f9fa;
+        }
+        
+        /* Clase de utilidad para ocultar/mostrar elementos */
+        .hidden {
+            display: none !important;
+        }
+
+        .dashboard-header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 2rem 0;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 1.5rem;
+        }
+
+        .dashboard-header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+
+        .btn {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .btn-primary {
+          background-color: #ffc107;
+          color: #000;
+        }
+
+        .btn-primary:hover {
+          background-color: #ffb300;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(255,193,7,0.3);
+        }
+
+        .btn-secondary {
+          background-color: #6c757d;
+          color: white;
+        }
+
+        .btn-secondary:hover {
+          background-color: #5a6268;
+        }
+
+        .btn-danger {
+          background-color: #dc3545;
+          color: white;
+          padding: 0.5rem 1rem;
+          font-size: 0.875rem;
+        }
+
+        .btn-danger:hover {
+          background-color: #c82333;
+        }
+
+        .btn-edit {
+          background-color: #17a2b8;
+          color: white;
+          padding: 0.5rem 1rem;
+          font-size: 0.875rem;
+        }
+
+        .btn-edit:hover {
+          background-color: #138496;
+        }
+
+        .dashboard-search-container {
+          margin: 2rem 0;
+          position: relative;
+        }
+
+        .dashboard-search-input {
+          width: 100%;
+          padding: 1rem 1rem 1rem 3rem;
+          border: 2px solid #e0e0e0;
+          border-radius: 10px;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .dashboard-search-input:focus {
+          outline: none;
+          border-color: #ffc107;
+          box-shadow: 0 0 0 3px rgba(255,193,7,0.1);
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #999;
+        }
+
+        .notebooks-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin: 2rem 0;
+        }
+
+        .notebook-card {
+          background: white;
+          border-radius: 12px;
+          padding: 1.5rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          transition: all 0.3s ease;
+          cursor: pointer;
+          border-left: 4px solid transparent;
+        }
+
+        .notebook-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .notebook-card.border-warning { border-left-color: #ffc107; }
+        .notebook-card.border-primary { border-left-color: #007bff; }
+        .notebook-card.border-success { border-left-color: #28a745; }
+        .notebook-card.border-danger { border-left-color: #dc3545; }
+        .notebook-card.border-info { border-left-color: #17a2b8; }
+
+        .notebook-header {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .notebook-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
+
+        .bg-warning { background-color: #ffc107; }
+        .bg-primary { background-color: #007bff; }
+        .bg-success { background-color: #28a745; }
+        .bg-danger { background-color: #dc3545; }
+        .bg-info { background-color: #17a2b8; }
+
+        .notebook-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0;
+        }
+
+        .notebook-description {
+          color: #666;
+          font-size: 0.9rem;
+          margin: 0.5rem 0 1rem 0;
+        }
+
+        .notebook-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 1rem;
+          border-top: 1px solid #eee;
+          font-size: 0.875rem;
+          color: #999;
+        }
+
+        .notebook-actions {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 1rem;
+        }
+
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .modal-content {
+          background: white;
+          padding: 2rem;
+          border-radius: 12px;
+          max-width: 500px;
+          width: 90%;
+          max-height: 90vh;
+          overflow-y: auto;
+          animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+          from {
+            transform: translateY(50px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .modal-header {
+          margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0;
+        }
+
+        /* .form-floating {
+          position: relative;
+          margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+          width: 100%;
+          padding: 1rem;
+          border: 2px solid #e0e0e0;
+          border-radius: 8px;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+          outline: none;
+          border-color: #ffc107;
+          box-shadow: 0 0 0 3px rgba(255,193,7,0.1);
+        }
+        
+        /* Estilos para el efecto 'placeholder flotante' */
+        /* .form-control:focus + label,
+        .form-control:not(:placeholder-shown) + label {
+          transform: translateY(-1.5rem) scale(0.85);
+          background: white;
+          padding: 0 0.5rem;
+          color: #ffc107;
+        } */
+        
+        /* Asegurarse que el label de textarea se comporte igual */
+         /* textarea.form-control:focus + label,
+         textarea.form-control:not(:placeholder-shown) + label {
+            transform: translateY(-1.5rem) scale(0.85);
+         }
+
+        label {
+          position: absolute;
+          left: 1rem;
+          top: 1rem;
+          color: #999;
+          transition: all 0.3s ease;
+          pointer-events: none;
+        }
+
+        textarea.form-control {
+          resize: vertical;
+          min-height: 100px;
+        }
+
+        .color-selector {
+          margin-bottom: 1.5rem;
+        }
+
+        .color-options {
+          display: flex;
+          gap: 1rem;
+          margin-top: 0.5rem;
+        }
+
+        .color-option {
+          width: 40px;
+          height: 40px;
+          border-radius: 8px;
+          cursor: pointer;
+          border: 3px solid transparent;
+          transition: all 0.3s ease;
+        }
+
+        .color-option:hover {
+          transform: scale(1.1);
+        }
+
+        .color-option.selected {
+          border-color: #333;
+          transform: scale(1.1);
+        } */
+
+        .modal-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: flex-end;
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 4rem 2rem;
+          color: #999;
+        }
+
+        .empty-state svg {
+          margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <div class="dashboard-container">
+            <div class="dashboard-header-content">
+                <div>
+                    <h1 class="m-0 fs-2">Mis Cuadernos</h1>
+                    <p class="m-0 opacity-9" id="notebook-count-text">
+                        </p>
+                </div>
+                <button class="btn btn-primary" id="new-notebook-btn">
+                    <i data-lucide="plus" size="20"></i>
+                    Nuevo Cuaderno
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="dashboard-search-container">
+            <i data-lucide="search" class="search-icon" size="20"></i>
+            <input
+                type="text"
+                class="dashboard-search-input"
+                id="search-input"
+                placeholder="Buscar cuadernos..."
+            />
+        </div>
+
+        <div class="notebooks-grid" id="notebooks-grid">
+            </div>
+
+        <div class="empty-state hidden" id="empty-state">
+            <i data-lucide="book" size="64" stroke-width="1"></i>
+            <h3>No se encontraron cuadernos</h3>
+            <p>Intenta con otra búsqueda o crea un nuevo cuaderno</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="modal-overlay">
+        <div class="modal-content" id="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Nuevo Cuaderno</h2>
+            </div>
+
+            <form id="notebook-form">
+                <div class="form-floating">
+                    <input
+                        type="text"
+                        name="title"
+                        id="form-title"
+                        class="form-control border border-warning"
+                        placeholder=" "
+                        required
+                        maxLength="50"
+                        autofocus
+                    />
+                    <label for="form-title">Título del cuaderno</label>
+                </div>
+
+                <div class="form-floating">
+                    <textarea
+                        name="description"
+                        id="form-description"
+                        class="form-control border border-warning"
+                        placeholder=" "
+                        required
+                        maxLength="200"
+                    ></textarea>
+                    <label for="form-description">Descripción</label>
+                </div>
+
+                <div class="color-selector">
+                    <label class="position-static text-dark fw-medium">
+                        Color del cuaderno
+                    </label>
+                    <div class="color-options" id="color-options-container">
+                        </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="modal-cancel-btn">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="modal-submit-btn">
+                        Crear Cuaderno
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Espera a que el DOM esté completamente cargado para ejecutar el script
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 1. ESTADO DE LA APLICACIÓN ---
+    // Equivalente a tu `useState` en React
+    let state = {
+        notebooks: [
+            { id: 1, title: 'Proyecto Personal', notes: 12, color: 'warning', lastModified: '2024-11-15', description: 'Ideas y planificación' },
+            { id: 2, title: 'Estudios', notes: 8, color: 'primary', lastModified: '2024-11-14', description: 'Apuntes de cursos' },
+            { id: 3, title: 'Trabajo', notes: 25, color: 'success', lastModified: '2024-11-13', description: 'Reuniones y tareas' }
+        ],
+        showModal: false,
+        editingNotebook: null,
+        searchTerm: '',
+        formData: {
+            title: '',
+            description: '',
+            color: 'warning'
+        }
+    };
+
+    // --- 2. CONSTANTES ---
+    const colors = [
+        { value: 'warning', label: 'Amarillo', class: 'bg-warning' },
+        { value: 'primary', label: 'Azul', class: 'bg-primary' },
+        { value: 'success', label: 'Verde', class: 'bg-success' },
+        { value: 'danger', label: 'Rojo', class: 'bg-danger' },
+        { value: 'info', label: 'Celeste', class: 'bg-info' }
+    ];
+
+    // --- 3. SELECTORES DEL DOM ---
+    // Referencias a los elementos HTML que vamos a manipular
+    const grid = document.getElementById('notebooks-grid');
+    const emptyState = document.getElementById('empty-state');
+    const searchInput = document.getElementById('search-input');
+    const notebookCountText = document.getElementById('notebook-count-text');
+    const newNotebookBtn = document.getElementById('new-notebook-btn');
+    
+    // Elementos del Modal
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalContent = document.getElementById('modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const notebookForm = document.getElementById('notebook-form');
+    const formTitle = document.getElementById('form-title');
+    const formDescription = document.getElementById('form-description');
+    const colorOptionsContainer = document.getElementById('color-options-container');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalSubmitBtn = document.getElementById('modal-submit-btn');
+
+    // --- 4. FUNCIONES DE RENDERIZADO ---
+    // Función principal que actualiza toda la UI basada en el estado
+    // Esta es la clave para simular la "reactividad"
+    function render() {
+        renderNotebookGrid();
+        renderModal();
+        renderNotebookCount();
+        
+        // ¡Importante! Llama a lucide.createIcons() después de renderizar
+        // para que los <i> tags se conviertan en SVGs
+        lucide.createIcons();
+    }
+
+    // Renderiza el contador de cuadernos
+    function renderNotebookCount() {
+        const count = state.notebooks.length;
+        notebookCountText.textContent = `${count} ${count === 1 ? 'cuaderno' : 'cuadernos'} en total`;
+    }
+
+    // Renderiza la cuadrícula de cuadernos
+    function renderNotebookGrid() {
+        // 1. Filtrar cuadernos
+        const filteredNotebooks = state.notebooks.filter(nb =>
+            nb.title.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+            nb.description.toLowerCase().includes(state.searchTerm.toLowerCase())
+        );
+
+        // 2. Limpiar la cuadrícula actual
+        grid.innerHTML = '';
+
+        // 3. Mostrar/ocultar estado vacío
+        if (filteredNotebooks.length === 0) {
+            emptyState.classList.remove('hidden');
+            grid.classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            // 4. Crear y añadir cada tarjeta
+            filteredNotebooks.forEach(notebook => {
+                const cardHTML = `
+                    <div class="notebook-card border-${notebook.color}">
+                        <div class="notebook-header">
+                            <div class="notebook-icon bg-${notebook.color}">
+                                <i data-lucide="book" size="24"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <h3 class="notebook-title">${notebook.title}</h3>
+                            </div>
+                        </div>
+                        
+                        <p class="notebook-description">${notebook.description}</p>
+                        
+                        <div class="notebook-meta">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="file-text" size="16"></i>
+                                <span>${notebook.notes} notas</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="calendar" size="16"></i>
+                                <span>${notebook.lastModified}</span>
+                            </div>
+                        </div>
+
+                        <div class="notebook-actions">
+                            <button class="btn btn-edit" data-id="${notebook.id}">
+                                <i data-lucide="edit-2" size="16"></i>
+                                Editar
+                            </button>
+                            <button class="btn btn-danger" data-id="${notebook.id}">
+                                <i data-lucide="trash-2" size="16"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                // Añadimos el HTML al final de la cuadrícula
+                grid.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+    }
+
+    // Renderiza el modal (mostrar/ocultar y poblar datos)
+    function renderModal() {
+        if (state.showModal) {
+            modalOverlay.classList.remove('hidden');
+
+            // Actualizar contenido del modal
+            const isEditing = !!state.editingNotebook;
+            modalTitle.textContent = isEditing ? 'Editar Cuaderno' : 'Nuevo Cuaderno';
+            modalSubmitBtn.textContent = isEditing ? 'Guardar Cambios' : 'Crear Cuaderno';
+
+            // Poblar formulario
+            formTitle.value = state.formData.title;
+            formDescription.value = state.formData.description;
+
+            // Renderizar selector de color
+            renderColorSelector();
+
+        } else {
+            modalOverlay.classList.add('hidden');
+        }
+    }
+    
+    // Renderiza las opciones de color dentro del modal
+    function renderColorSelector() {
+        colorOptionsContainer.innerHTML = ''; // Limpiar opciones
+        colors.forEach(color => {
+            const isSelected = state.formData.color === color.value;
+            const colorDiv = document.createElement('div');
+            colorDiv.className = `color-option ${color.class} ${isSelected ? 'selected' : ''}`;
+            colorDiv.title = color.label;
+            colorDiv.dataset.value = color.value; // Guardamos el valor en un data-attribute
+            colorOptionsContainer.appendChild(colorDiv);
+        });
+    }
+
+    // --- 5. MANEJADORES DE LÓGICA (Equivalente a tus funciones) ---
+
+    // Cierra el modal y resetea el estado del formulario
+    function closeModal() {
+        state.showModal = false;
+        state.editingNotebook = null;
+        state.formData = { title: '', description: '', color: 'warning' };
+        // Re-renderizar la UI
+        render();
+    }
+
+    // Abre el modal para crear un nuevo cuaderno
+    function openNewModal() {
+        state.showModal = true;
+        state.editingNotebook = null;
+        state.formData = { title: '', description: '', color: 'warning' };
+        render();
+        formTitle.focus(); // Pone el foco en el primer input
+    }
+    
+    // Maneja el envío del formulario (Crear o Editar)
+    function handleSubmit(e) {
+        e.preventDefault(); // Evita que la página se recargue
+
+        // Formatear la fecha actual
+        const today = new Date().toISOString().split('T')[0];
+
+        if (state.editingNotebook) {
+            // --- Lógica de Edición ---
+            state.notebooks = state.notebooks.map(nb =>
+                nb.id === state.editingNotebook.id
+                    ? { ...nb, ...state.formData, lastModified: today }
+                    : nb
+            );
+        } else {
+            // --- Lógica de Creación ---
+            const newNotebook = {
+                id: Date.now(), // ID único simple
+                ...state.formData,
+                notes: 0,
+                lastModified: today
+            };
+            state.notebooks = [...state.notebooks, newNotebook];
+        }
+        
+        closeModal(); // Cierra el modal y re-renderiza todo
+    }
+
+    // Maneja la apertura del modal para editar
+    function handleEdit(id) {
+        const notebook = state.notebooks.find(nb => nb.id === id);
+        if (!notebook) return;
+
+        state.editingNotebook = notebook;
+        state.formData = {
+            title: notebook.title,
+            description: notebook.description,
+            color: notebook.color
+        };
+        state.showModal = true;
+        
+        render();
+        formTitle.focus();
+    }
+
+    // Maneja la eliminación de un cuaderno
+    function handleDelete(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar este cuaderno?')) {
+            state.notebooks = state.notebooks.filter(nb => nb.id !== id);
+            // Re-renderizar la UI
+            render();
+        }
+    }
+
+    // --- 6. EVENT LISTENERS ---
+
+    // Botón "Nuevo Cuaderno"
+    newNotebookBtn.addEventListener('click', openNewModal);
+
+    // Botones del Modal
+    modalCancelBtn.addEventListener('click', closeModal);
+    // Cerrar al hacer clic fuera del contenido
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
+    });
+
+    // Formulario
+    notebookForm.addEventListener('submit', handleSubmit);
+    
+    // Actualizar el estado 'formData' mientras el usuario escribe
+    formTitle.addEventListener('input', (e) => {
+        state.formData.title = e.target.value;
+    });
+    formDescription.addEventListener('input', (e) => {
+        state.formData.description = e.target.value;
+    });
+
+    // Búsqueda (se actualiza al escribir)
+    searchInput.addEventListener('input', (e) => {
+        state.searchTerm = e.target.value;
+        renderNotebookGrid(); // Solo necesitamos re-renderizar la cuadrícula
+        lucide.createIcons(); // ...y los iconos dentro de ella
+    });
+
+    // --- DELEGACIÓN DE EVENTOS ---
+
+    // Para los botones de color en el modal
+    colorOptionsContainer.addEventListener('click', (e) => {
+        const colorOption = e.target.closest('.color-option');
+        if (colorOption) {
+            const selectedColor = colorOption.dataset.value;
+            state.formData.color = selectedColor;
+            renderColorSelector(); // Re-renderizar solo los colores
+        }
+    });
+
+    // Para los botones "Editar" y "Eliminar" en la cuadrícula
+    grid.addEventListener('click', (e) => {
+        // e.target.closest() busca el botón más cercano,
+        // incluso si se hizo clic en el icono <i> dentro de él
+        
+        const editBtn = e.target.closest('.btn-edit');
+        if (editBtn) {
+            const id = Number(editBtn.dataset.id);
+            handleEdit(id);
+            return; // Salir para no procesar el de eliminar
+        }
+
+        const deleteBtn = e.target.closest('.btn-danger');
+        if (deleteBtn) {
+            const id = Number(deleteBtn.dataset.id);
+            handleDelete(id);
+        }
+    });
+
+    // --- 7. RENDERIZADO INICIAL ---
+    // Llama a render() una vez al cargar la página
+    render();
+});
+    </script>
+
+</body>
+</html>

@@ -45,7 +45,10 @@ class SessionManager {
     }
 
     static function isAuthenticated(): bool {
-        return self::has('user') && self::get('login') === true;
+        return self::has('user') && 
+            self::get('user') !== null && 
+            self::has('login') && 
+            self::get('login') === true;
     }
 }
 

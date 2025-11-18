@@ -1,8 +1,8 @@
 <?php
     $children = '
 
-    <div id="main">
-        <h1 class="center error">'.htmlspecialchars($this->message['description']).'</h1>
+    <div id="main" class="error-view">
+        <h1 class="center error fw-bold">'.htmlspecialchars($this->message['description']).'</h1>
     </div>
     
     ';
