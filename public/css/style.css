@@ -926,14 +926,6 @@ body::before {
           padding: 0 1.5rem;
         }
 
-        .dashboard-header-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 1rem;
-        }
-
         .dashboard-search-container {
           margin: 2rem 0;
           position: relative;

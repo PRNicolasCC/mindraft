@@ -3,7 +3,7 @@
 $children = '
     <div class="dashboard-header">
         <div class="dashboard-container">
-            <div class="dashboard-header-content d-flex">
+            <div class="d-flex justify-content-between align-items-center gap-1">
                 <div>
                     <h1 class="m-0 fs-2">Mis Cuadernos</h1>
                     <p class="m-0 opacity-9" id="notebook-count-text">
@@ -14,6 +14,17 @@ $children = '
                         <i data-lucide="plus" size="20"></i>
                         Nuevo Cuaderno
                     </button>
+                </div>
+
+                <div>
+                    <form action="" method="post">
+                        <input type="hidden" name="csrf_token" value="'.SessionManager::get('csrf_token').'">
+                        <input type="hidden" name="logout" value="1" required>
+                        <button type="submit" class="btn-danger">
+                            <i data-lucide="log-out" size="20"></i>
+                            Cerrar Sesión
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

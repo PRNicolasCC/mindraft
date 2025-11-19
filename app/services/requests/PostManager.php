@@ -27,7 +27,6 @@ class PostManager extends Manager {
         ];
         $passwordActions = [
             'password_reset' => ['password', 'sendEmail'],
-            'password_change' => ['password', 'change'],
         ];
         $notebookActions = [
             'create_notebook' => ['notebook', 'store'],

@@ -22,6 +22,7 @@ class PasswordController extends UserController {
     }
 
     function form(): void {
+        $this->isNotAuth();
         if (!SessionManager::has('redirectInputs') || !isset(SessionManager::get('redirectInputs')['email']) || !isset(SessionManager::get('redirectInputs')['token'])) {
             $this->redirect('/');
         }

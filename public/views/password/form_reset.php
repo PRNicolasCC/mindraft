@@ -7,6 +7,7 @@ $propsAuth = [
 ];
 
 $childrenAuth = '
+            <input type="hidden" name="_method" value="PUT">
             <div class="form-floating password-field">
                 <input
                     type="password"
