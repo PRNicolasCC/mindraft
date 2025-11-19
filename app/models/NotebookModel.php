@@ -33,8 +33,8 @@ class NotebookModel extends Model {
     }
 
     function obtenerPorUsuario(int $userId): ?array{
-        $sql = "SELECT * FROM {$this->table} WHERE usuario_id = :usuario_id";
-        return $this->db->fetchAll($sql, ['usuario_id' => $userId]);
+        $sql = "SELECT * FROM {$this->table} WHERE usuario_id = :usuario_id AND estado_id = :estado_id";
+        return $this->db->fetchAll($sql, ['usuario_id' => $userId, 'estado_id' => 'A']);
     }
 
     function obtenerPorId(int $id): ?array{
@@ -42,27 +42,28 @@ class NotebookModel extends Model {
         return $this->db->fetchOne($sql, ['id' => $id]);
     }
 
-    function actualizar(int $id, string $nombre, string $descripcion, string $color, string $estadoId): bool{
-        $estadosPermitidos = ['A', 'I'];
+    function actualizar(int $id, string $nombre, string $descripcion, string $color, int $userId): void{
+        /* $estadosPermitidos = ['A', 'I'];
         if (!in_array($estadoId, $estadosPermitidos)) {
             throw new Exception("Estado no válido. Estados permitidos: " . implode(', ', $estadosPermitidos));
-        }
+        } */
 
-        $sql = "UPDATE {$this->table} SET nombre = :nombre, descripcion = :descripcion, color = :color, estado_id = :estado_id WHERE id = :id";
+        $sql = "UPDATE {$this->table} SET nombre = :nombre, descripcion = :descripcion, color = :color WHERE id = :id AND usuario_id = :usuario_id";
         $parametros = [
             'id' => $id,
             'nombre' => $nombre,
             'descripcion' => $descripcion,
             'color' => $color,
-            'estado_id' => $estadoId
+            'usuario_id' => $userId
         ];
-        return $this->db->ejecutar($sql, $parametros) > 0;
+        $this->db->ejecutar($sql, $parametros);
     }
 
-    function eliminar(int $id): bool{
-        $sql = "DELETE FROM {$this->table} WHERE id = :id";
+    function eliminar(int $id, int $userId): bool{
+        $sql = "DELETE FROM {$this->table} WHERE id = :id AND usuario_id = :usuario_id";
         $parametros = [
-            'id' => $id
+            'id' => $id,
+            'usuario_id' => $userId
         ];
         return $this->db->ejecutar($sql, $parametros) > 0;
     }

@@ -14,6 +14,9 @@
     <!-- Lucide -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
     <base href="<?php echo htmlspecialchars($_ENV['DOMAIN'] . '/'); ?>">
 
     <!-- CSS -->

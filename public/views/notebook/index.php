@@ -1,9 +1,5 @@
 <?php
 
-/* foreach($data as $notebook){
-    echo $notebook;
-} */
-
 $children = '
     <div class="dashboard-header">
         <div class="dashboard-container">
@@ -14,7 +10,7 @@ $children = '
                         </p>
                 </div>
                 <div>
-                    <button class="btn" id="new-notebook-btn" data-bs-toggle="modal" data-bs-target="#modal-overlay">
+                    <button class="btn" id="new-notebook-btn" data-bs-toggle="modal" data-bs-target="#modal-create">
                         <i data-lucide="plus" size="20"></i>
                         Nuevo Cuaderno
                     </button>
@@ -40,21 +36,11 @@ $children = '
         <div class="notebooks-grid">';
 
         if (!empty($data)) {
-            foreach ($data as $index => $notebook) {
+            foreach ($data as $notebook) {
                 $children .= '
-                    <!-- <div class="notebook-card border-'.$notebook['color'].'">
+                    <div class="notebook-card" style="border-color: '.$notebook['color'].'">
                     <div class="notebook-header">
-                        <div class="notebook-icon bg-'.$notebook['color'].'">
-                            <i data-lucide="book" size="24"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <h3 class="notebook-title">'.$notebook['nombre'].'</h3>
-                        </div>
-                    </div> -->
-
-                    <div class="notebook-card border-primary">
-                    <div class="notebook-header">
-                        <div class="notebook-icon bg-primary">
+                        <div class="notebook-icon" style="background-color: '.$notebook['color'].'">
                             <i data-lucide="book" size="24"></i>
                         </div>
                         <div style="flex: 1;">
@@ -62,7 +48,7 @@ $children = '
                         </div>
                     </div>
                     
-                    <p class="notebook-description">'. 'una descripción' .'</p>
+                    <p class="notebook-description">'.$notebook['descripcion'].'</p>
                     
                     <div class="notebook-meta">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -76,11 +62,11 @@ $children = '
                     </div>
 
                     <div class="notebook-actions">
-                        <button class="btn-edit" data-id="'.$notebook['id'].'">
+                        <button class="btn-edit" data-id="'.$notebook['id'].'" data-nombre="'.$notebook['nombre'].'" data-descripcion="'.$notebook['descripcion'].'" data-color="'.$notebook['color'].'" data-bs-toggle="modal" data-bs-target="#modal-edit">
                             <i data-lucide="edit-2" size="16"></i>
                             Editar
                         </button>
-                        <button class="btn-danger" data-id="'.$notebook['id'].'">
+                        <button class="btn-danger" data-id="'.$notebook['id'].'" data-bs-toggle="modal" data-bs-target="#modal-delete">
                             <i data-lucide="trash-2" size="16"></i>
                             Eliminar
                         </button>
@@ -88,21 +74,9 @@ $children = '
                 </div>';
             }    
         }    
-$children .= '</div>
-    </div>
 
-    <div class="modal fade" id="modal-overlay" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Nuevo cuaderno</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
 
-            <form method="post" action="" id="notebook-form">
-            <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
-                <div class="form-floating">
+    $formCreate = '<div class="form-floating">
                     <input
                         type="text"
                         name="nombre"
@@ -110,7 +84,7 @@ $children .= '</div>
                         class="form-control border border-warning"
                         placeholder=" "
                         required
-                        maxLength="50"
+                        maxLength="75"
                         autofocus
                     />
                     <label for="form-title">Título del cuaderno</label>
@@ -122,8 +96,7 @@ $children .= '</div>
                         id="form-description"
                         class="form-control border border-warning"
                         placeholder="Descripción"
-                        required
-                        maxLength="200"
+                        maxLength="100"
                     ></textarea>
                     
                 </div>
@@ -146,13 +119,70 @@ $children .= '</div>
                     <button type="submit" name="create_notebook" class="btn-primary">
                         Crear Cuaderno
                     </button>
-                </div>
-            </form>
-        </div>
-        </div>
-        </div>
-    </div>
+                </div>';
+    $children .= $this->modal('modal-create', 'Nuevo cuaderno', $formCreate, 'create-notebook-form');
     
+
+    $formEdit = '<div class="form-floating">
+                    <input
+                        type="text"
+                        name="nombre"
+                        id="editNombre"
+                        class="form-control border border-warning"
+                        placeholder=" "
+                        required
+                        maxLength="75"
+                        autofocus
+                    />
+                    <label for="editNombre">Título del cuaderno</label>
+                </div>
+
+                <div class="form-floating">
+                    <textarea
+                        name="descripcion"
+                        id="editDescripcion"
+                        class="form-control border border-warning"
+                        placeholder="Descripción"
+                        maxLength="100"
+                    ></textarea>
+                    
+                </div>
+
+                <div class="form-floating">
+                    <input
+                        type="color"
+                        name="color"
+                        id="editColor"
+                        class="form-control border border-warning"
+                        required
+                    />
+                    <label for="editColor" class="text-dark">Color del cuaderno</label>
+                </div>
+
+                <input type="hidden" id="notebookId" name="id">
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" name="edit_notebook" class="btn-primary">
+                        Actualizar Cuaderno
+                    </button>
+                </div>';
+    $children .= $this->modal('modal-edit', 'Editar cuaderno', $formEdit, 'edit-notebook-form');
+
+    $formDelete = '<input type="hidden" id="notebookDeleteId" name="id">
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" name="delete_notebook" class="btn-danger">
+                        Eliminar Cuaderno
+                    </button>
+                </div>';
+    $children .= $this->modal('modal-delete', '¿Estás seguro de eliminar este cuaderno?', $formDelete, 'delete-notebook-form');
+    
+    $children .= '<script src="public/js/notebook/modal.js"></script>
     <script src="public/js/notebook/index.js"></script>
     <script>
         lucide.createIcons();

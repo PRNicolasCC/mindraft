@@ -26,20 +26,35 @@ class NotebookController extends Controller {
         }
     }
 
-    /* function edit(string $id): void{
-        $this->isAuth();
-        $this->view->render('notebook/index');
-    }
-
     function update(array $data): void{
         $this->isAuth();
-        $this->view->render('notebook/index');
+        $this->model->actualizar(
+            intval($data['id']), 
+            $data['nombre'], 
+            $data['descripcion'], 
+            $data['color'], 
+            SessionManager::get('user')['id']
+        );
+        $this->successRedirect(
+            'Cuaderno actualizado correctamente',                 
+            [],
+            '/'
+        );
     }
 
-    function destroy(string $id): void{
+    function destroy(array $data): void{
         $this->isAuth();
-        $this->view->render('notebook/index');
-    } */
+        $delete = $this->model->eliminar(intval($data['id']), SessionManager::get('user')['id']);
+        if ($delete) {
+            $this->successRedirect(
+                'Cuaderno eliminado correctamente',                 
+                [],
+                '/'
+            );
+        } else {
+            $this->cambiarError('Error al eliminar el cuaderno. Por favor contacte al administrador');
+        }
+    }
 }
 
 ?>

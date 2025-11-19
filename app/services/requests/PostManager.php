@@ -32,6 +32,8 @@ class PostManager {
             ];
             $notebookActions = [
                 'create_notebook' => ['notebook', 'store'],
+                'edit_notebook' => ['notebook', 'update'],
+                'delete_notebook' => ['notebook', 'destroy'],
             ];
             $postActions = array_merge(
                 $userActions, 
