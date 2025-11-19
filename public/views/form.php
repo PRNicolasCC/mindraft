@@ -15,6 +15,8 @@
                         <div class="spinner" id="sendSpinner"></div>
                     </button>' : '';
 
+                    $children .= '<div id="descriptionMessageJS"></div>';
+
     $children .= $this->getDescriptionMessage();
     $children .= $aditionalAuth ?? '';
     $children .= '</form>

@@ -23,7 +23,7 @@ function showMessage(text, type) {
     message.innerHTML = `<i class="fa-solid ${getMessageIconJs(type)}"></i>${text}`;
     
     // Add to form
-    document.getElementById('sendForm').appendChild(message);
+    document.getElementById('descriptionMessageJS').appendChild(message);
 }
 
 // Clear loading state on page unload (back button)

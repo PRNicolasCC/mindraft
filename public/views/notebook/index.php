@@ -123,7 +123,8 @@ $children = '
     $children .= $this->modal('modal-create', 'Nuevo cuaderno', $formCreate, 'create-notebook-form');
     
 
-    $formEdit = '<div class="form-floating">
+    $formEdit = '<input type="hidden" name="_method" value="PUT">
+                <div class="form-floating">
                     <input
                         type="text"
                         name="nombre"
@@ -171,7 +172,8 @@ $children = '
                 </div>';
     $children .= $this->modal('modal-edit', 'Editar cuaderno', $formEdit, 'edit-notebook-form');
 
-    $formDelete = '<input type="hidden" id="notebookDeleteId" name="id">
+    $formDelete = '<input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" id="notebookDeleteId" name="id">
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" data-bs-dismiss="modal">
                         Cancelar

@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 require_once 'app/services/requests/PostManager.php';
+require_once 'app/services/requests/PutManager.php';
+require_once 'app/services/requests/DeleteManager.php';
 require_once 'app/controllers/ErroresController.php';
 
 require_once 'vendor/autoload.php';
@@ -13,7 +15,22 @@ class App{
 
     function __construct(){
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            $request = new PostManager();
+            $request = null;
+            if (isset($_POST['_method'])) {
+                $simulated_method = strtoupper($_POST['_method']);
+                switch ($simulated_method) {
+                    case 'PUT':
+                        $request = new PutManager();
+                        break;
+                    case 'DELETE':
+                        $request = new DeleteManager();
+                        break;
+                    default:
+                        $this->controller = new ErroresController('Error 403: Método no permitido');
+                        break;
+                }
+            }
+            if($request === null) $request = new PostManager();
             if(!empty($request->errorMessage)) $this->controller = new ErroresController($request->errorMessage);
         } else {
             if (!SessionManager::has('csrf_token')) SessionManager::set('csrf_token', bin2hex(random_bytes(32)));
