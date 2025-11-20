@@ -16,7 +16,7 @@
                 </div>
 
                 <div class="form-floating">
-                    <div id="editorQuillEdit" name="obs-edit" contenteditable="true"></div>
+                    <div id="editorQuillEdit" name="obs-edit"></div>
                 </div>
 
                 <!-- Campo para recibir el contenido del editor Quill.

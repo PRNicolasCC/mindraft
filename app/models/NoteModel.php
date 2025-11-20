@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once 'vendor/autoload.php';
+
 class NoteModel extends Model {
     private string $table = 'notas';
     private string $tableNotebooks = 'cuadernos';
@@ -105,5 +107,19 @@ class NoteModel extends Model {
             'descripcion' => $descripcion
         ];
         $this->db->ejecutar($sql, $parametros);
+    }
+
+    private function sanitizar_html(string $html_sucio): string {
+        // Se recomienda usar la configuración predeterminada para un saneamiento estricto.
+        $config = HTMLPurifier_Config::createDefault();
+
+        // Opcional: personalizar qué etiquetas y atributos permitir.
+        // Por defecto, permite etiquetas de Quill como p, br, b, i, ul, li, etc.
+        //$config->set('HTML.Allowed', 'p,br,b,i,a[href],img[src|alt],ul,ol,li');
+
+        $purifier = new HTMLPurifier($config);
+        $html_limpio = $purifier->purify($html_sucio);
+        
+        return $html_limpio;
     }
 }

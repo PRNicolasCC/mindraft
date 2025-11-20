@@ -116,13 +116,12 @@ $children = '
         require_once 'modals/edit_note.php';
         //require_once 'modals/delete_note.php';
     
-    $children .= '<script src="public/js/notebook/modal.js"></script>
-    <script src="public/js/notebook/note.js"></script>
+    $children .= '<script src="public/js/notebook/note.js"></script>
+    <script src="public/js/notebook/modal.js"></script>
+    
     
     <!-- Quill JS -->
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-    
-    <script src="public/js/notebook/index.js"></script>';
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>';
 
 require_once 'public/views/index.php';
 
