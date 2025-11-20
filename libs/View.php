@@ -40,7 +40,23 @@ class View{
         if (!empty($inputs)) SessionManager::set('redirectInputs', $inputs);
     }
 
-    function modal(string $id, string $title, string $formContent, string $formId): string{
+    function modal(string $id, string $content): string{
+        return '<div class="modal fade" id="'.htmlspecialchars($id).'" tabindex="-1" aria-labelledby="'.htmlspecialchars($id).'Label" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                        '.$content.'
+                </div>
+                </div>
+                </div>
+            </div>';
+    }
+
+    function formModal(string $id, string $title, string $formContent, string $formId): string{
         return '<div class="modal fade" id="'.htmlspecialchars($id).'" tabindex="-1" aria-labelledby="'.htmlspecialchars($id).'Label" aria-hidden="true">
                 <div class="modal-dialog">
             <div class="modal-content">
@@ -49,7 +65,6 @@ class View{
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
                     <form method="post" action="" id="'.htmlspecialchars($formId).'">
                     <input type="hidden" name="csrf_token" value="'.htmlspecialchars(SessionManager::get('csrf_token')).'">
                         '.$formContent.'

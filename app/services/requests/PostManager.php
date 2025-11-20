@@ -31,11 +31,15 @@ class PostManager extends Manager {
         $notebookActions = [
             'create_notebook' => ['notebook', 'store'],
         ];
+        $noteActions = [
+            'create_note' => ['note', 'store'],
+        ];
         $postActions = array_merge(
             $userActions, 
             $authActions, 
             $passwordActions, 
-            $notebookActions
+            $notebookActions,
+            $noteActions
         );
 
         parent::__construct($postActions);

@@ -1,7 +1,7 @@
 <?php
 
 class NotebookModel extends Model {
-    protected $table = 'cuadernos';
+    private string $table = 'cuadernos';
 
     /** 
      * Constructor de la clase NotebookModel.
@@ -37,9 +37,9 @@ class NotebookModel extends Model {
         return $this->db->fetchAll($sql, ['usuario_id' => $userId, 'estado_id' => 'A']);
     }
 
-    function obtenerPorId(int $id): ?array{
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id";
-        return $this->db->fetchOne($sql, ['id' => $id]);
+    function obtenerPorId(int $id, int $userId): ?array{
+        $sql = "SELECT * FROM {$this->table} WHERE id = :id AND usuario_id = :usuario_id";
+        return $this->db->fetchOne($sql, ['id' => $id, 'usuario_id' => $userId]);
     }
 
     function actualizar(int $id, string $nombre, string $descripcion, string $color, int $userId): void{

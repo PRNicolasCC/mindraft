@@ -16,6 +16,8 @@
 
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- Quill Stylesheet -->
+     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 
     <base href="<?php echo htmlspecialchars($_ENV['DOMAIN'] . '/'); ?>">
 
