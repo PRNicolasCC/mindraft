@@ -1,10 +1,10 @@
 // Espera a que el documento esté completamente cargado
 $(document).ready(function() {
-    let idGeneral = null;
+    //let idGeneral = null;
     $("#modal-notes").on("show.bs.modal", function (event) {
         const button = $(event.relatedTarget);
         const id = button.data("id");
-        idGeneral = id;
+        //idGeneral = id;
         const nombre = button.data("nombre");
         const modal = $(this);
         modal.find("#modalTitle").text(nombre);
@@ -35,8 +35,8 @@ $(document).ready(function() {
                             <th scope="row">${element.nombre}</th>
                             <td>${element.fecha}</td>
                             <td class="d-flex gap-1 justify-content-evenly">
-                                <button class="btn-edit w-25 d-flex align-items-center" data-id="${element.id}"><i data-lucide="edit-2" size="16"></i></button>
-                                <button class="btn-danger w-25 d-flex align-items-center" data-id="${element.id}"><i data-lucide="trash-2" size="16"></i></button>
+                                <button class="btn-edit w-25 d-flex align-items-center" data-id="${element.id}" data-bs-toggle="modal" data-bs-target="#modal-edit-note"><i data-lucide="edit-2" size="16"></i></button>
+                                <button class="btn-danger w-25 d-flex align-items-center" data-id="${element.id}"><i data-lucide="trash-2" size="16" data-bs-toggle="modal" data-bs-target="#modal-delete-note"></i></button>
                             </td>
                         </tr>`;
                     });
