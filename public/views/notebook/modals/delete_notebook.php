@@ -2,6 +2,9 @@
 
     $formDelete = '<input type="hidden" name="_method" value="DELETE">
                 <input type="hidden" id="notebookDeleteId" name="id">
+                <p>Se eliminarán todas las notas asociadas a este cuaderno</p>
+                <br>
+
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" data-bs-dismiss="modal">
                         Cancelar

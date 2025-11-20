@@ -38,7 +38,7 @@ $(document).ready(function() {
                 if (datosRecibidos.length === 0) {
                     $("#notes-list").append("<p>No hay notas registradas para este cuaderno</p>");
                 } else {       
-                    let html_contenido = '<table class="table table-striped table-hover"><thead><tr><th scope="col">Nota</th><th scope="col">Fecha</th><th scope="col">Acciones</th></tr></thead><tbody>';     
+                    let html_contenido = '<table class="table table-striped table-hover"><thead><tr><th scope="col">Nota</th><th scope="col">Última modificación</th><th scope="col">Acciones</th></tr></thead><tbody>';     
                     datosRecibidos.forEach(element => {
                         html_contenido += `                        
                         <tr>
@@ -46,7 +46,7 @@ $(document).ready(function() {
                             <td>${element.fecha}</td>
                             <td class="d-flex gap-1 justify-content-evenly">
                                 <button class="btn-edit w-25 d-flex align-items-center" data-id="${element.id}" data-nombre="${element.nombre}" data-cuaderno-id="${element.cuaderno_id}" data-bs-toggle="modal" data-bs-target="#modal-edit-note"><i data-lucide="edit-2" size="16"></i></button>
-                                <button class="btn-danger w-25 d-flex align-items-center" data-id="${element.id}" data-cuaderno-id="${element.cuaderno_id}"><i data-lucide="trash-2" size="16" data-bs-toggle="modal" data-bs-target="#modal-delete-note"></i></button>
+                                <button class="btn-danger w-25 d-flex align-items-center" data-id="${element.id}" data-cuaderno-id="${element.cuaderno_id}" data-bs-toggle="modal" data-bs-target="#modal-delete-note"><i data-lucide="trash-2" size="16"></i></button>
                             </td>
                         </tr>`;
                     });
@@ -124,6 +124,10 @@ $(document).ready(function() {
 
                     // Inserta el HTML (ya sanitizado) en la posición 0 (el inicio del editor)
                     //quillEdit.clipboard.dangerouslyPasteHTML(0, datosRecibidos.descripcion);
+
+                    quillEdit.setContents([
+                        { insert: '\n' } // Esto asegura que Quill tenga al menos un párrafo vacío para escribir a fin de que no se duplique la descripción de una nota anterior en dado caso de que la presente esté vacía.
+                    ]);
                     const deltaObjeto = JSON.parse(datosRecibidos.descripcion);
                     quillEdit.setContents(deltaObjeto);
                 },
@@ -136,5 +140,14 @@ $(document).ready(function() {
                     console.error("Error AJAX:", status, error);
                 }
             });
+        });
+
+    $('#modal-delete-note').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data('id');    
+        const idCuaderno = button.data('cuaderno-id');    
+        const modal = $(this);
+        modal.find('#noteDeleteId').val(id);
+        modal.find('#notebookIdNoteDelete').val(idCuaderno);
     });
 });

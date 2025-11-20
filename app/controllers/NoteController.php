@@ -71,12 +71,16 @@ class NoteController extends Controller {
 
     function destroy(array $data): void{
         $this->isAuth();
-        $this->model->eliminar(intval($data['id']), intval($data['cuaderno_id']));
-        $this->successRedirect(
-            'Nota eliminada correctamente',                 
-            [],
-            '/'
-        );
+        $delete = $this->model->eliminar(intval($data['id']), intval($data['cuaderno_id']));
+        if ($delete) {
+            $this->successRedirect(
+                'Nota eliminada correctamente',                 
+                [],
+                '/'
+            );
+        } else {
+            $this->cambiarError('Error al eliminar la nota. Por favor contacte al administrador');
+        }
     }
 
     private function eliminarEtiquetas(string $html): string{

@@ -8,8 +8,12 @@ class DeleteManager extends Manager {
         $notebookActions = [
             'delete_notebook' => ['notebook', 'destroy'],
         ];
+        $noteActions = [
+            'delete_note' => ['note', 'destroy'],
+        ];
         $deleteActions = array_merge(
             $notebookActions,
+            $noteActions,
         );
 
         parent::__construct($deleteActions);
