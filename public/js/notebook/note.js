@@ -35,8 +35,8 @@ $(document).ready(function() {
                             <th scope="row">${element.nombre}</th>
                             <td>${element.fecha}</td>
                             <td class="d-flex gap-1 justify-content-evenly">
-                                <button class="btn-edit w-25 d-flex align-items-center" data-id="${element.id}" data-bs-toggle="modal" data-bs-target="#modal-edit-note"><i data-lucide="edit-2" size="16"></i></button>
-                                <button class="btn-danger w-25 d-flex align-items-center" data-id="${element.id}"><i data-lucide="trash-2" size="16" data-bs-toggle="modal" data-bs-target="#modal-delete-note"></i></button>
+                                <button class="btn-edit w-25 d-flex align-items-center" data-id="${element.id}" data-nombre="${element.nombre}" data-cuaderno-id="${element.cuaderno_id}" data-bs-toggle="modal" data-bs-target="#modal-edit-note"><i data-lucide="edit-2" size="16"></i></button>
+                                <button class="btn-danger w-25 d-flex align-items-center" data-id="${element.id}" data-cuaderno-id="${element.cuaderno_id}"><i data-lucide="trash-2" size="16" data-bs-toggle="modal" data-bs-target="#modal-delete-note"></i></button>
                             </td>
                         </tr>`;
                     });
@@ -50,7 +50,7 @@ $(document).ready(function() {
             // Función que se ejecuta si hay un error en la solicitud
             error: function(xhr, status, error) {
                 // Mostrar el error si algo falla
-                $("#notes-list").html("<p>❌ Error al cargar los datos: " + status + " (" + error + ")</p>");
+                $("#notes-list").html("<p>Error al cargar los datos: " + status + " (" + error + ")</p>");
                 console.error("Error AJAX:", status, error);
             }
         });
@@ -59,6 +59,7 @@ $(document).ready(function() {
     $("#modal-create-note").on("show.bs.modal", function(event) {
         const button = $(event.relatedTarget);
         const id = button.data("id");
+        
         const modal = $(this);
         modal.find("#notebookIdNote").val(id);
     });
@@ -66,7 +67,43 @@ $(document).ready(function() {
     $("#modal-edit-note").on("show.bs.modal", function(event) {
         const button = $(event.relatedTarget);
         const id = button.data("id");
+        const idCuaderno = button.data("cuaderno-id");
+        const nombre = button.data("nombre");
         const modal = $(this);
-        modal.find("#notebookIdNote").val(id);
+        modal.find("#notebookIdNote").val(idCuaderno);
+        modal.find("#editNotaNombre").val(nombre);
+        modal.find("#noteIdNote").val(id);
+
+        $("#editorQuillEdit").html("<p>Cargando datos...</p>");
+        
+        // La función principal de jQuery para la solicitud AJAX
+        $.ajax({
+            // URL del script de PHP que nos dará los datos
+            url: 'note/detail/'+idCuaderno+'/'+id, 
+            // Método de la solicitud (puede ser 'GET' o 'POST')
+            type: 'GET',
+            // Tipo de datos que esperamos recibir de PHP
+            dataType: 'json', 
+            
+            // Función que se ejecuta si la solicitud es exitosa
+            success: function(datosRecibidos) {
+                // 'datosRecibidos' es ahora un objeto JavaScript gracias a 'dataType: "json"'
+                
+                if (datosRecibidos.length === 0) {
+                    $("#editorQuillEdit").html("<p>No se ha encontrado información para la nota</p>");
+                } else {
+                    // Mostrar el resultado en el div
+                    $("#editorQuillEdit").html(datosRecibidos.descripcion);
+                    lucide.createIcons();
+                }
+            },
+            
+            // Función que se ejecuta si hay un error en la solicitud
+            error: function(xhr, status, error) {
+                // Mostrar el error si algo falla
+                $("#editorQuillEdit").html("<p>Error al cargar los datos: " + status + " (" + error + ")</p>");
+                console.error("Error AJAX:", status, error);
+            }
+        });
     });
 });

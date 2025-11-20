@@ -113,8 +113,8 @@ $children = '
         require_once 'modals/delete_notebook.php';
         require_once 'modals/list_notes.php';
         require_once 'modals/create_note.php';
-        /* require_once 'modals/edit_note.php';
-        require_once 'modals/delete_note.php'; */
+        require_once 'modals/edit_note.php';
+        //require_once 'modals/delete_note.php';
     
     $children .= '<script src="public/js/notebook/modal.js"></script>
     <script src="public/js/notebook/note.js"></script>

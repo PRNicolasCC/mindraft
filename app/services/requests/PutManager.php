@@ -11,9 +11,13 @@ class PutManager extends Manager {
         $passwordActions = [
             'password_change' => ['password', 'change'],
         ];
+        $noteActions = [
+            'edit_note' => ['note', 'update'],
+        ];
         $putActions = array_merge(
             $notebookActions,
-            $passwordActions
+            $passwordActions,
+            $noteActions
         );
 
         parent::__construct($putActions);

@@ -11,7 +11,7 @@ class NoteModel extends Model {
     }
 
     function obtenerPorCuaderno(int $cuadernoId, int $userId): ?array{
-        $sql = "SELECT a.id, a.nombre, a.fecha FROM {$this->table} a 
+        $sql = "SELECT a.id, a.nombre, a.fecha, a.cuaderno_id FROM {$this->table} a 
                 JOIN {$this->tableNotebooks} b ON a.cuaderno_id = b.id 
                 WHERE a.cuaderno_id = :cuaderno_id AND b.usuario_id = :usuario_id
                 ORDER BY a.fecha DESC";
@@ -24,11 +24,23 @@ class NoteModel extends Model {
     }
 
     function obtenerPorId(int $id, int $cuadernoId, int $userId): ?array{
-        $sql = "SELECT * FROM notas WHERE id = :id AND cuaderno_id = :cuaderno_id AND usuario_id = :usuario_id";
+        $sql = "SELECT * FROM {$this->table} WHERE id = :id AND cuaderno_id = :cuaderno_id AND usuario_id = :usuario_id";
         $parametros = [
             'id' => $id,
             'cuaderno_id' => $cuadernoId,
             'usuario_id' => $userId
+        ];
+        $resultado = $this->db->fetchOne($sql, $parametros);
+        return $resultado;
+    }
+
+    function obtenerDescripcion(int $id, int $cuadernoId): ?array{
+        $sql = "SELECT b.descripcion FROM {$this->table} a
+                JOIN {$this->tableDetails} b ON a.id = b.nota_id
+                WHERE a.id = :id AND a.cuaderno_id = :cuaderno_id";
+        $parametros = [
+            'id' => $id,
+            'cuaderno_id' => $cuadernoId,
         ];
         $resultado = $this->db->fetchOne($sql, $parametros);
         return $resultado;
@@ -47,7 +59,30 @@ class NoteModel extends Model {
             return [
                 'id' => $nuevoId,
                 'nombre' => $nombre,
-                'fecha' => date('Y-m-d H:i:s'),
+                'fecha' => $this->dateTime->format('Y-m-d H:i:s'),
+            ];
+        }
+        return null;
+    }
+
+    function actualizar(int $id, string $nombre, string $detalle, int $cuadernoId): ?array{
+        $sql = "UPDATE {$this->table} a
+                JOIN {$this->tableDetails} b ON a.id = b.nota_id
+                SET a.nombre = :nombre, b.descripcion = :detalle, a.fecha = :fecha
+                WHERE a.id = :id AND a.cuaderno_id = :cuaderno_id";
+        $parametros = [
+            'id' => $id,
+            'nombre' => $nombre,
+            'detalle' => $detalle,
+            'fecha' => $this->dateTime->format('Y-m-d H:i:s'),
+            'cuaderno_id' => $cuadernoId
+        ];
+        $actualizacion = $this->db->ejecutar($sql, $parametros);
+        if ($actualizacion > 0) {
+            return [
+                'id' => $id,
+                'nombre' => $nombre,
+                'fecha' => $this->dateTime->format('Y-m-d H:i:s'),
             ];
         }
         return null;
