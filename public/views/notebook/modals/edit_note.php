@@ -16,12 +16,12 @@
                 </div>
 
                 <div class="form-floating">
-                    <div id="editorQuillEdit" name="obs"></div>
+                    <div id="editorQuillEdit" name="obs-edit" contenteditable="true"></div>
                 </div>
 
                 <!-- Campo para recibir el contenido del editor Quill.
                     Es el que se tiene que utilizar en el controlador -->
-                <input type="hidden" name="observacion" id="contenido-obs">
+                <input type="hidden" name="observacion" id="contenido-obs-edit">
 
                 <input type="hidden" id="noteIdNote" name="id">
                 <input type="hidden" id="notebookIdNote" name="cuaderno_id">
@@ -34,5 +34,5 @@
                         Actualizar Nota
                     </button>
                 </div>';
-    $children .= $this->formModal('modal-edit-note', 'Editar Nota', $editNote, 'edit-note-form');
+    $children .= $this->formModal('modal-edit-note', 'Editar Nota', $editNote, 'edit-note-form', 'modal-lg');
 ?>

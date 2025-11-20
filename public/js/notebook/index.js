@@ -14,7 +14,7 @@ $(document).ready(function() {
 
     $('#edit-note-form').submit(function() {
         var contenidoDiv = $("#editorQuillEdit").html();    
-        $("#contenido-obs").val(contenidoDiv);  
+        $("#contenido-obs-edit").val(contenidoDiv);  
     });
 
     if (typeof lucide !== 'undefined' && lucide.createIcons) {

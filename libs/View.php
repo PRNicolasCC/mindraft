@@ -56,9 +56,9 @@ class View{
             </div>';
     }
 
-    function formModal(string $id, string $title, string $formContent, string $formId): string{
+    function formModal(string $id, string $title, string $formContent, string $formId, string $modalWidth = ''): string{
         return '<div class="modal fade" id="'.htmlspecialchars($id).'" tabindex="-1" aria-labelledby="'.htmlspecialchars($id).'Label" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog '.htmlspecialchars($modalWidth).'">
             <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="'.htmlspecialchars($id).'Label">'.htmlspecialchars($title).'</h5>

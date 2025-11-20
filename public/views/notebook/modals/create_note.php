@@ -33,5 +33,5 @@
                         Crear Nota
                     </button>
                 </div>';
-    $children .= $this->formModal('modal-create-note', 'Nueva nota', $createNote, 'create-note-form');
+    $children .= $this->formModal('modal-create-note', 'Nueva nota', $createNote, 'create-note-form', 'modal-lg');
 ?>

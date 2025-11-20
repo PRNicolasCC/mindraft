@@ -69,6 +69,16 @@ class NoteController extends Controller {
         );
     }
 
+    function destroy(array $data): void{
+        $this->isAuth();
+        $this->model->eliminar(intval($data['id']), intval($data['cuaderno_id']));
+        $this->successRedirect(
+            'Nota eliminada correctamente',                 
+            [],
+            '/'
+        );
+    }
+
     private function eliminarEtiquetas(string $html): string{
         $eliminarClases = [
             ['div', 'ql-editor'],

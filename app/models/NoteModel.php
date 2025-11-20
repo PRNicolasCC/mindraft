@@ -88,6 +88,16 @@ class NoteModel extends Model {
         return null;
     }
 
+    function eliminar(int $id, int $cuadernoId): bool{
+        $sql = "DELETE FROM {$this->table} WHERE id = :id AND cuaderno_id = :cuaderno_id";
+        $parametros = [
+            'id' => $id,
+            'cuaderno_id' => $cuadernoId
+        ];
+        $eliminacion = $this->db->ejecutar($sql, $parametros);
+        return $eliminacion > 0;
+    }
+
     private function crearDetalle(int $notaId, string $descripcion): void{
         $sql = "INSERT INTO {$this->tableDetails} (nota_id, descripcion) VALUES (:nota_id, :descripcion)";
         $parametros = [
