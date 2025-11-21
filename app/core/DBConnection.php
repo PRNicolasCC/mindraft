@@ -23,7 +23,7 @@ class DBConnection {
         $this->port = $port ?? $_ENV['DB_PORT'];
         $this->db = $db ?? $_ENV['DB_NAME'];
         $this->user = $user ?? $_ENV['DB_USER'];
-        $this->password = $password ?? '';
+        $this->password = $password ?? $_ENV['DB_PASSWORD'];
         $this->charset = $charset ?? $_ENV['DB_CHARSET'];
     }
 
