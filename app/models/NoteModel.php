@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once 'vendor/autoload.php';
+require_once BASE_PATH . 'vendor/autoload.php';
 
 class NoteModel extends Model {
     private string $table = 'notas';

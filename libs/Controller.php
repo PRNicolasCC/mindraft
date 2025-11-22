@@ -30,7 +30,7 @@ abstract class Controller{
     */
     function loadModel(string $model): void {
         $model = ucfirst($model);
-        $url = 'app/models/'.$model.'Model.php';
+        $url = BASE_PATH . 'app/models/' . $model . 'Model.php';
 
         if(file_exists($url)){
             require $url;
@@ -64,7 +64,7 @@ abstract class Controller{
     static function getInfoController(string $name): array{
         $name = ucfirst($name);
         return [
-            'file' => 'app/controllers/' . $name . 'Controller.php',
+            'file' => BASE_PATH . 'app/controllers/' . $name . 'Controller.php',
             'controller' => $name . 'Controller',
         ];
     }

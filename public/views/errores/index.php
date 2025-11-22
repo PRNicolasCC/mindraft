@@ -7,5 +7,5 @@
     
     ';
 
-    require_once 'public/views/index.php';
+    require_once BASE_PATH . 'public/views/index.php';
 ?>

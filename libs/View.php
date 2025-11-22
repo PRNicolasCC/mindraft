@@ -14,8 +14,8 @@ class View{
     }
 
     function render(string $file, ?array $data = null): void{
-        #extract($data);
-        require 'public/views/' . $file . '.php';
+        $render = BASE_PATH . 'public/views/' . $file . '.php';
+        require BASE_PATH . 'public/views/' . $file . '.php';
     }
 
     function getDescriptionMessage(): ?string{

@@ -123,6 +123,6 @@ $children = '
     <!-- Quill JS -->
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>';
 
-require_once 'public/views/index.php';
+require_once BASE_PATH . 'public/views/index.php';
 
 ?>

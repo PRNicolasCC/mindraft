@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once 'app/controllers/UserController.php';
+require_once BASE_PATH . 'app/controllers/UserController.php';
 
 class AuthController extends UserController {
     function __construct() {

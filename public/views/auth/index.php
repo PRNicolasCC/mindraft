@@ -53,6 +53,6 @@ $aditionalAuth = '<div class="text-center pt-5">
 
 $scriptsAuth = '<script src="public/js/auth/index.js"></script>';
 
-require_once 'public/views/form.php';
+require_once BASE_PATH . 'public/views/form.php';
 
 ?>

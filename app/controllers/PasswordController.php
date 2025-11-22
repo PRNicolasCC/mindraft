@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once 'app/controllers/UserController.php';
-require_once 'app/services/EmailService.php';
+require_once BASE_PATH . 'app/controllers/UserController.php';
+require_once BASE_PATH . 'app/services/EmailService.php';
 
 class PasswordController extends UserController {
     function __construct() {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
-require 'vendor/autoload.php';
+require BASE_PATH . 'vendor/autoload.php';
 
 class EmailService {
     static function sendEmailRecuperacion(string $email, string $token): void {

@@ -45,5 +45,5 @@ $aditionalAuth = '
 
 $scriptsAuth = '<script src="public/js/password/index.js"></script>';
 
-require_once 'public/views/form.php';
+require_once BASE_PATH . 'public/views/form.php';
 ?>

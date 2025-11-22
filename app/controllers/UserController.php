@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once 'app/services/EmailService.php';
+require_once BASE_PATH . 'app/services/EmailService.php';
 
 class UserController extends Controller {
     protected const PASSWORD_MIN_LENGTH = 8;

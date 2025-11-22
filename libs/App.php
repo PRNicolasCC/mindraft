@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-require_once 'app/services/requests/PostManager.php';
-require_once 'app/services/requests/PutManager.php';
-require_once 'app/services/requests/DeleteManager.php';
-require_once 'app/controllers/ErroresController.php';
+require_once BASE_PATH . 'app/services/requests/PostManager.php';
+require_once BASE_PATH . 'app/services/requests/PutManager.php';
+require_once BASE_PATH . 'app/services/requests/DeleteManager.php';
+require_once BASE_PATH . 'app/controllers/ErroresController.php';
 
-require_once 'vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+require_once BASE_PATH . 'vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
 
 class App{
@@ -41,7 +42,7 @@ class App{
 
             // cuando se ingresa sin definir controlador
             if(empty($url[0])){
-                require_once 'app/controllers/NotebookController.php';
+                require_once BASE_PATH . 'app/controllers/NotebookController.php';
                 $this->controller = new NotebookController();
                 $this->controller->render();
                 return;
