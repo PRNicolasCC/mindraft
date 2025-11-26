@@ -9,3 +9,20 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+
+# Evitar que se listen los archivos de una carpeta si no hay un index.html
+Options -Indexes
+
+# Bloquear acceso a archivos específicos (ej. .env, .git, archivos log)
+<FilesMatch "^\.|\.(log|ini|git|env|yml|json|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+
+# Forzar a que todo pase por el index.php principal:
+<FilesMatch "\.(inc|tpl|h)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
