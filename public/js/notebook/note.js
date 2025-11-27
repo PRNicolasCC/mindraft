@@ -1,16 +1,12 @@
+if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+}
+
+let quill = null;
+let quillEdit = null;
+
 // Espera a que el documento esté completamente cargado
 $(document).ready(function() {
-    if (typeof lucide !== 'undefined' && lucide.createIcons) {
-        lucide.createIcons();
-    }
-    
-    const quill = new Quill('#editorQuill', {
-        theme: 'snow'
-    });
-
-    const quillEdit = new Quill('#editorQuillEdit', {
-        theme: 'snow'
-    });
 
     $("#modal-notes").on("show.bs.modal", function (event) {
         const button = $(event.relatedTarget);
@@ -67,6 +63,30 @@ $(document).ready(function() {
     });
 
     $("#modal-create-note").on("show.bs.modal", function(event) {
+        if (quill === null) {
+            quill = new Quill('#editorQuill', {
+                theme: 'snow',
+                placeholder: 'Nota...'
+            });
+
+        } else {                
+            //el editor se vacía en cada apertura:
+            quill.setText('');
+        }
+
+            $('#create-note-form').submit(function() {
+                // Verificamos que la instancia exista ANTES de intentar obtener el valor
+                /* if (quill) {   */               
+                    const contenidoDiv = quill.getContents(); // Obtener el contenido como Delta y no como HTML
+                    const contenidoDeltaJSON = JSON.stringify(contenidoDiv);
+                    $("#contenido-obs").val(contenidoDeltaJSON);  
+                /* } else {
+                    // Esto solo debería pasar si se intenta enviar sin abrir el modal antes.
+                    console.error("La instancia de Quill no ha sido inicializada.");
+                    // e.preventDefault(); // Podrías querer detener el envío si esto pasa
+                } */
+            });
+
         const button = $(event.relatedTarget);
         const id = button.data("id");
         
@@ -75,16 +95,14 @@ $(document).ready(function() {
     });
 
     $("#modal-edit-note").on("show.bs.modal", function(event) {
-
-        $('#create-note-form').submit(function() {
-            //var contenidoDiv = $("#editorQuill").html();
-            var contenidoDiv = quill.getContents(); // Obtener el contenido como Delta y no como HTML
-            const contenidoDeltaJSON = JSON.stringify(contenidoDiv);
-            $("#contenido-obs").val(contenidoDeltaJSON);  
-        });
+        if (quillEdit === null) {
+            quillEdit = new Quill('#editorQuillEdit', {
+                theme: 'snow',
+            });
+        }
 
         $('#edit-note-form').submit(function() {
-            var contenidoDiv = quillEdit.getContents();
+            const contenidoDiv = quillEdit.getContents();
             // Esto es necesario para guardar el objeto en un campo de texto de la base de datos
             const contenidoDeltaJSON = JSON.stringify(contenidoDiv);
             $("#contenido-obs-edit").val(contenidoDeltaJSON);  
@@ -95,11 +113,9 @@ $(document).ready(function() {
         const idCuaderno = button.data("cuaderno-id");
         const nombre = button.data("nombre");
         const modal = $(this);
-            modal.find("#notebookIdNote").val(idCuaderno);
+            modal.find("#notebookIdNoteEdit").val(idCuaderno);
             modal.find("#editNotaNombre").val(nombre);
             modal.find("#noteIdNote").val(id);
-
-            //$("#editorQuillEdit").html("<p>Cargando datos...</p>");
             
             // La función principal de jQuery para la solicitud AJAX
             $.ajax({
@@ -112,18 +128,6 @@ $(document).ready(function() {
                 
                 // Función que se ejecuta si la solicitud es exitosa
                 success: function(datosRecibidos) {
-                    // 'datosRecibidos' es ahora un objeto JavaScript gracias a 'dataType: "json"'
-                    
-                    /* if (datosRecibidos.length === 0) {
-                        $("#editorQuillEdit").html("<p>No se ha encontrado información para la nota</p>");
-                    } else {
-                        // Mostrar el resultado en el div
-                        $("#editorQuillEdit").html(datosRecibidos.descripcion);
-                        lucide.createIcons();
-                    } */
-
-                    // Inserta el HTML (ya sanitizado) en la posición 0 (el inicio del editor)
-                    //quillEdit.clipboard.dangerouslyPasteHTML(0, datosRecibidos.descripcion);
 
                     quillEdit.setContents([
                         { insert: '\n' } // Esto asegura que Quill tenga al menos un párrafo vacío para escribir a fin de que no se duplique la descripción de una nota anterior en dado caso de que la presente esté vacía.
@@ -135,7 +139,6 @@ $(document).ready(function() {
                 // Función que se ejecuta si hay un error en la solicitud
                 error: function(xhr, status, error) {
                     // Mostrar el error si algo falla
-                    //$("#editorQuillEdit").html("<p>Error al cargar los datos: " + status + " (" + error + ")</p>");
                     quillEdit.clipboard.dangerouslyPasteHTML(0, "Error al cargar los datos: " + status + " (" + error + ")");
                     console.error("Error AJAX:", status, error);
                 }

@@ -24,7 +24,7 @@
                 <input type="hidden" name="observacion" id="contenido-obs-edit">
 
                 <input type="hidden" id="noteIdNote" name="id">
-                <input type="hidden" id="notebookIdNote" name="cuaderno_id">
+                <input type="hidden" id="notebookIdNoteEdit" name="cuaderno_id">
 
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" data-bs-dismiss="modal">

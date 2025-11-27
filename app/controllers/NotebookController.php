@@ -14,7 +14,12 @@ class NotebookController extends Controller {
 
     function store(array $data): void{
         $this->isAuth();
-        $notebook = $this->model->crear($data['nombre'], $data['descripcion'], $data['color'], SessionManager::get('user')['id']);
+        $notebook = $this->model->crear(
+            $data['nombre'], 
+            $data['descripcion'], 
+            $data['color'], 
+            SessionManager::get('user')['id']
+        );
         if (!empty($notebook)) {
             $this->successRedirect(
                 'Cuaderno creado correctamente',                 

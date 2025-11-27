@@ -10,6 +10,16 @@ class NotebookModel extends Model {
         parent::__construct();
     }
 
+    function obtenerPorUsuario(int $userId): ?array{
+        $sql = "SELECT * FROM {$this->table} WHERE usuario_id = :usuario_id AND estado_id = :estado_id";
+        return $this->db->fetchAll($sql, ['usuario_id' => $userId, 'estado_id' => 'A']);
+    }
+
+    function obtenerPorId(int $id, int $userId): ?array{
+        $sql = "SELECT * FROM {$this->table} WHERE id = :id AND usuario_id = :usuario_id";
+        return $this->db->fetchOne($sql, ['id' => $id, 'usuario_id' => $userId]);
+    }
+
     function crear(string $nombre, string $descripcion, string $color, int $userId): ?array{
         $sql = "INSERT INTO {$this->table} (nombre, descripcion, color, usuario_id) VALUES (:nombre, :descripcion, :color, :usuario_id)";
         $parametros = [
@@ -30,16 +40,6 @@ class NotebookModel extends Model {
             ];
         }
         return null;
-    }
-
-    function obtenerPorUsuario(int $userId): ?array{
-        $sql = "SELECT * FROM {$this->table} WHERE usuario_id = :usuario_id AND estado_id = :estado_id";
-        return $this->db->fetchAll($sql, ['usuario_id' => $userId, 'estado_id' => 'A']);
-    }
-
-    function obtenerPorId(int $id, int $userId): ?array{
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id AND usuario_id = :usuario_id";
-        return $this->db->fetchOne($sql, ['id' => $id, 'usuario_id' => $userId]);
     }
 
     function actualizar(int $id, string $nombre, string $descripcion, string $color, int $userId): void{

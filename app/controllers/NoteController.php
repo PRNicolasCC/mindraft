@@ -40,8 +40,11 @@ class NoteController extends Controller {
 
     function store(array $data): void{
         $this->isAuth();
-        //$data['observacion'] = $this->eliminarEtiquetas($data['observacion']);
-        $note = $this->model->crear($data['nombre'], $data['observacion'], intval($data['cuaderno_id']));
+        $note = $this->model->crear(
+            $data['nombre'], 
+            $data['observacion'], 
+            intval($data['cuaderno_id'])
+        );
         if (!empty($note)) {
             $this->successRedirect(
                 'Nota creada correctamente',                 
@@ -55,7 +58,6 @@ class NoteController extends Controller {
 
     function update(array $data): void{
         $this->isAuth();
-        //$data['observacion'] = $this->eliminarEtiquetas($data['observacion']);
         $this->model->actualizar(
             intval($data['id']), 
             $data['nombre'], 
