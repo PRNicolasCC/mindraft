@@ -95,11 +95,65 @@ $(document).ready(function() {
     });
 
     $("#modal-edit-note").on("show.bs.modal", function(event) {
-        if (quillEdit === null) {
-            quillEdit = new Quill('#editorQuillEdit', {
-                theme: 'snow',
-            });
+
+        const button = $(event.relatedTarget);
+        const id = button.data("id");
+        const idCuaderno = button.data("cuaderno-id");
+        const nombre = button.data("nombre");
+        const modal = $(this);
+
+        // Limpiar en caso de que existan para que no se agreguen más editores cada que se abre un modal, sino que siempre haya un único editor por modal
+        if($('#editorQuillEdit').length > 0){
+            $('#editorQuillEdit').remove();
         }
+        // Vaciar todo lo que está adentro de editorQuillDiv 
+        $("#editorQuillDiv").empty();
+        quillEdit = null; // ¡Restablecer la variable es clave!
+    
+        modal.find("#notebookIdNoteEdit").val(idCuaderno);
+        modal.find("#editNotaNombre").val(nombre);
+        modal.find("#noteIdNote").val(id);
+            
+        // La función principal de jQuery para la solicitud AJAX
+        $.ajax({
+            // URL del script de PHP que nos dará los datos
+            url: 'note/detail/'+idCuaderno+'/'+id, 
+            // Método de la solicitud (puede ser 'GET' o 'POST')
+            type: 'GET',
+            // Tipo de datos que esperamos recibir de PHP
+            dataType: 'json', 
+            
+            // Función que se ejecuta si la solicitud es exitosa
+            success: function(datosRecibidos) {
+
+                // Crear campo únicamente cuando ya se recibe la respuesta asíncrona del detalle
+                const miNuevoElemento = $("<div>", {
+                    id: "editorQuillEdit",
+                    name: "obs-edit"
+                });
+                $("#editorQuillDiv").append(miNuevoElemento);
+                
+                if (quillEdit === null) {
+                    quillEdit = new Quill('#editorQuillEdit', {
+                        theme: 'snow',
+                    });
+                }
+
+                quillEdit.setText('');
+                /* quillEdit.setContents([
+                    { insert: '\n' } // Esto asegura que Quill tenga al menos un párrafo vacío para escribir a fin de que no se duplique la descripción de una nota anterior en dado caso de que la presente esté vacía.
+                ]); */
+                const deltaObjeto = JSON.parse(datosRecibidos.descripcion);
+                quillEdit.setContents(deltaObjeto);
+            },
+            
+            // Función que se ejecuta si hay un error en la solicitud
+            error: function(xhr, status, error) {
+                // Mostrar el error si algo falla
+                //quillEdit.clipboard.dangerouslyPasteHTML(0, "Error al cargar los datos: " + status + " (" + error + ")");
+                console.error("Error AJAX:", status, error);
+            }
+        });
 
         $('#edit-note-form').submit(function() {
             const contenidoDiv = quillEdit.getContents();
@@ -107,43 +161,14 @@ $(document).ready(function() {
             const contenidoDeltaJSON = JSON.stringify(contenidoDiv);
             $("#contenido-obs-edit").val(contenidoDeltaJSON);  
         });
+    });
 
-        const button = $(event.relatedTarget);
-        const id = button.data("id");
-        const idCuaderno = button.data("cuaderno-id");
-        const nombre = button.data("nombre");
-        const modal = $(this);
-            modal.find("#notebookIdNoteEdit").val(idCuaderno);
-            modal.find("#editNotaNombre").val(nombre);
-            modal.find("#noteIdNote").val(id);
-            
-            // La función principal de jQuery para la solicitud AJAX
-            $.ajax({
-                // URL del script de PHP que nos dará los datos
-                url: 'note/detail/'+idCuaderno+'/'+id, 
-                // Método de la solicitud (puede ser 'GET' o 'POST')
-                type: 'GET',
-                // Tipo de datos que esperamos recibir de PHP
-                dataType: 'json', 
-                
-                // Función que se ejecuta si la solicitud es exitosa
-                success: function(datosRecibidos) {
 
-                    quillEdit.setContents([
-                        { insert: '\n' } // Esto asegura que Quill tenga al menos un párrafo vacío para escribir a fin de que no se duplique la descripción de una nota anterior en dado caso de que la presente esté vacía.
-                    ]);
-                    const deltaObjeto = JSON.parse(datosRecibidos.descripcion);
-                    quillEdit.setContents(deltaObjeto);
-                },
-                
-                // Función que se ejecuta si hay un error en la solicitud
-                error: function(xhr, status, error) {
-                    // Mostrar el error si algo falla
-                    quillEdit.clipboard.dangerouslyPasteHTML(0, "Error al cargar los datos: " + status + " (" + error + ")");
-                    console.error("Error AJAX:", status, error);
-                }
-            });
-        });
+    $("#modal-edit-note").on("hidden.bs.modal", function(event) {
+        $('#editorQuillEdit').remove();
+        quillEdit = null;
+    })
+
 
     $('#modal-delete-note').on('show.bs.modal', function (event) {
         const button = $(event.relatedTarget);

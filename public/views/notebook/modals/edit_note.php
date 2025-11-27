@@ -15,8 +15,8 @@
                     <label for="editNotaNombre">Título de la nota</label>
                 </div>
 
-                <div class="form-floating">
-                    <div id="editorQuillEdit" name="obs-edit"></div>
+                <div class="form-floating" id="editorQuillDiv">
+                    <!-- <div id="editorQuillEdit" name="obs-edit"></div> -->
                 </div>
 
                 <!-- Campo para recibir el contenido del editor Quill.
