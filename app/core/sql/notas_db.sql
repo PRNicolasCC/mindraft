@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-11-2025 a las 20:25:42
+-- Tiempo de generación: 27-11-2025 a las 16:57:55
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -129,7 +129,6 @@ CREATE TABLE `usuarios` (
 --
 ALTER TABLE `cuadernos`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_nombre` (`nombre`),
   ADD KEY `fk_usuario` (`usuario_id`),
   ADD KEY `fk_estado` (`estado_id`);
 
@@ -248,7 +247,6 @@ COMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
 
-
 INSERT INTO `estados` (`id`, `nombre`) VALUES
 ('A', 'Activo'),
 ('I', 'Inactivo');
@@ -256,4 +254,3 @@ INSERT INTO `estados` (`id`, `nombre`) VALUES
 INSERT INTO `token_tipos` (`id`, `nombre`) VALUES
 ('P', 'password_reset'),
 ('A', 'account_activation');
-
