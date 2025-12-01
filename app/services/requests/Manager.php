@@ -52,10 +52,10 @@ abstract class Manager {
         $this->sanitizarDatos();
 
         // 5. Validar que la petición viene del mismo sitio
-        if(!$this->validarReferer()){
+        /* if(!$this->validarReferer()){
             $this->errorMessage = 'La solicitud no proviene de una fuente válida.';
             return false;
-        }
+        } */
 
         return true;
     }
@@ -130,9 +130,16 @@ abstract class Manager {
     /**
      * Valida que la petición venga del mismo sitio (Referer)
      * 
+     * En este caso está comentada debido a que no se puede validar el referer 
+     * con la configuración por defecto de Cloudflare al aplicar esta función,
+     * ya que Cloudflare modifica el referer para mejorar las capas de seguridad.
+     * De igual manera no es requerido aplicar la función si ya se manejan tokens CSRF
+     * dentro de la aplicación.
+     * La validación del referer tiene que ser una capa de seguridad secundaria muy 
+     * específica (una defensa en profundidad)
      * @return bool
      */
-    private function validarReferer(): bool {
+    /* private function validarReferer(): bool {
         $referer = $_SERVER['HTTP_REFERER'] ?? '';
         $host = $_SERVER['HTTP_HOST'] ?? '';
         $esquema = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
@@ -145,5 +152,5 @@ abstract class Manager {
 
         // Validar que el referer inicie con la URL base del sitio
         return strpos($referer, $urlBase) === 0;
-    }
+    } */
 }
