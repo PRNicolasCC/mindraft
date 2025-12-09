@@ -261,7 +261,7 @@ body::before {
     color: var(--text-dark) !important;
     font-weight: 600;
     font-size: 1.05rem;
-    padding: 16px 12px;
+    padding: 16px 12px !important;
     width: 100%;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
